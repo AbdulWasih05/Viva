@@ -38,19 +38,24 @@ All times IST. Deadline: **Mon 5 Oct, 12:29 PM**. Internal publish target: **Mon
 ## Phase 0: Setup, research, spikes (Sat, 3 h)
 
 - [ ] **0.1 Repo and tooling**
-  - [ ] Create public GitHub repo `viva` (first commit inside the challenge window)
-  - [ ] Scaffold Next.js (App Router, TS strict, Tailwind, ESLint) with pnpm; add Vitest, zod, `typecheck`
-  - [ ] Create `.env.example`, `docs/PROGRESS.md`, `docs/DECISIONS.md`, `docs/post/`; fill the Commands section of CLAUDE.md
+  - [x] Create public GitHub repo `viva` (first commit inside the challenge window)
+  - [x] Scaffold Next.js (App Router, TS strict, Tailwind, ESLint) with pnpm; add Vitest, zod, `typecheck`
+  - [x] Create `.env.example`, `docs/PROGRESS.md`, `docs/DECISIONS.md`, `docs/post/`; fill the Commands section of CLAUDE.md
   - [ ] Verify `pnpm dev`, `pnpm typecheck`, `pnpm test`
+    - [x] `pnpm typecheck`, `pnpm lint`, `pnpm build` pass
+    - [ ] `pnpm test` (blocked: Vitest's native binding is skipped on Node 22.11; needs Node >= 22.13)
+    - [ ] `pnpm dev` page loads
 - [ ] **0.2 Session capture (before any real coding)**
   - [ ] Install the Entire CLI (docs.entire.io/quickstart), run its Claude Code setup in the repo (`entire enable`), choose "always" to link commits to sessions. Verify with `entire checkpoint list` after a commit
+    - [x] `entire enable --agent claude-code` done, hooks in `.claude/settings.json`
+    - [ ] Checkpoint appears after a commit (needs a fresh Claude Code session so the hooks load)
   - [ ] Install DevRelay (devrelay.com, MCP server + skills) for saving a session to DEV later
-  - [ ] Confirm the privacy rule: public repo means public checkpoints; no secrets in sessions
+  - [x] Confirm the privacy rule: public repo means public checkpoints; no secrets in sessions (DECISIONS D17)
   - [ ] Timebox 20 minutes; log blockers in DECISIONS.md
-- [ ] **0.3 Research: Gemma**
-  - [ ] Current Gemma family and Ollama tags; pick the ~4B model that fits 16 GB RAM (do not test 12B locally)
-  - [ ] Hosted Gemma option (OpenAI-compatible, free tier or credits) that offers a larger Gemma (12B or 27B): candidates Google AI Studio / Gemini API, OpenRouter, others. Record limits
-  - [ ] Does the chosen Gemma accept images? (decides Phase 8)
+- [x] **0.3 Research: Gemma**
+  - [x] Current Gemma family and Ollama tags; pick the ~4B model that fits 16 GB RAM (do not test 12B locally): `gemma4:e4b` (D2, D3)
+  - [x] Hosted Gemma option (OpenAI-compatible, free tier or credits) that offers a larger Gemma (12B or 27B): candidates Google AI Studio / Gemini API, OpenRouter, others. Record limits: AI Studio `gemma-4-31b-it`, OpenRouter fallback (D1)
+  - [x] Does the chosen Gemma accept images? (decides Phase 8): yes per the model docs, not yet tried by us
 - [ ] **0.4 Spike: Mastra (45 min, decides architecture)**
   - [ ] Minimal Mastra agent calling Ollama Gemma through an OpenAI-compatible provider
   - [ ] One tool call works (`readFile` stub) with the ~4B model
@@ -64,7 +69,8 @@ All times IST. Deadline: **Mon 5 Oct, 12:29 PM**. Internal publish target: **Mon
 - [ ] **0.6 Research: other partners (read only)**
   - [ ] Render: private services, persistent disk, instance RAM needed for ~4B Gemma on Ollama, Blueprint syntax, Deploy to Render button; claim credits at hacktoberfest.com/my/promos
   - [ ] ElevenLabs: TTS endpoint, voice IDs for two personas, speech-to-text with word timestamps; claim credits
-  - [ ] Sentry: Next.js setup, AI SDK / Mastra integration for automatic LLM spans, custom span attributes, dashboards
+  - [x] Sentry: Next.js setup, AI SDK / Mastra integration for automatic LLM spans, custom span attributes, dashboards
+  - Render and ElevenLabs docs are read (notes in DECISIONS.md); still open: Wasih claims credits, and voice IDs get picked from `GET /v2/voices` once there is a key
 - [ ] **0.7 Model benchmark (post material)**
   - [ ] `scripts/bench-models.ts`: same brief + question prompts, ~~10 runs each on local ~4B and hosted larger Gemma~~ 3 runs on local `gemma4:e4b` and 5 on hosted Gemma 4 31B (DECISIONS D8: CPU runs are slow; the rest moves to Phase 1 evals)
   - [ ] Record: structured output validity, median latency, question specificity (names a real file?). Tag `[POST]`
