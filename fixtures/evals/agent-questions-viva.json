@@ -1,0 +1,111 @@
+[
+  {
+    "fixture": "viva",
+    "round": "decisions",
+    "filesRead": [
+      "src/mastra/index.ts"
+    ],
+    "activity": [
+      "reading src/mastra/index.ts"
+    ],
+    "question": "In `src/mastra/index.ts`, you register the interviewer agent centrally within the Mastra instance. Why did you choose this centralized registration instead of instantiating agents where they are needed?"
+  },
+  {
+    "fixture": "viva",
+    "round": "deep-dive",
+    "filesRead": [
+      "src/lib/interview/prompts.ts"
+    ],
+    "activity": [
+      "checking who wrote src/lib/interview/prompts.ts",
+      "reading src/lib/interview/prompts.ts",
+      "reading src/lib/interview/prompts.ts"
+    ],
+    "question": "Your Entire session shows an AI agent wrote src/lib/interview/prompts.ts (the prompt was: \"1,2 isdone lets skip teh devrealy install, render and eleven labs credits i will claim, yep lets do stacked prs\"). In `src/lib/interview/prompts.ts`, how does the `briefPrompt` function ensure that the LLM generates accurate information about the project's files and structure?"
+  },
+  {
+    "fixture": "viva",
+    "round": "failure-scale",
+    "filesRead": [
+      "src/lib/llm/structured.ts"
+    ],
+    "activity": [
+      "reading src/lib/llm/structured.ts",
+      "reading src/lib/llm/structured.ts"
+    ],
+    "question": "In `src/lib/llm/structured.ts`, you only allow for one repair attempt before returning a fallback value. What happens to the user experience if the model consistently fails to satisfy the Zod schema even after that second attempt?"
+  },
+  {
+    "fixture": "viva",
+    "round": "decisions",
+    "filesRead": [
+      "src/mastra/index.ts"
+    ],
+    "activity": [
+      "reading src/mastra/index.ts"
+    ],
+    "question": "In src/mastra/index.ts, you're registering the interviewer agent directly within the Mastra instance. Why did you choose this centralized registration instead of instantiating agents locally where they are needed?"
+  },
+  {
+    "fixture": "viva",
+    "round": "deep-dive",
+    "filesRead": [
+      "src/lib/interview/prompts.ts"
+    ],
+    "activity": [
+      "checking who wrote src/lib/interview/prompts.ts",
+      "reading src/lib/interview/prompts.ts",
+      "reading src/lib/interview/prompts.ts"
+    ],
+    "question": "Your Entire session shows an AI agent wrote src/lib/interview/prompts.ts (the prompt was: \"1,2 isdone lets skip teh devrealy install, render and eleven labs credits i will claim, yep lets do stacked prs\"). In `src/lib/interview/prompts.ts`, how does the `briefPrompt` function construct its instructions for the LLM? Specifically, how does it handle file contents and candidate corrections?"
+  },
+  {
+    "fixture": "viva",
+    "round": "failure-scale",
+    "filesRead": [
+      "src/lib/llm/structured.ts"
+    ],
+    "activity": [
+      "reading src/lib/llm/structured.ts",
+      "reading src/lib/llm/structured.ts",
+      "reading src/lib/llm/structured.ts",
+      "reading src/lib/llm/structured.ts"
+    ],
+    "question": "In src/lib/llm/structured.ts, you attempt a retry if the first response fails validation. What happens if the second attempt also fails to match the Zod schema?"
+  },
+  {
+    "fixture": "viva",
+    "round": "decisions",
+    "filesRead": [
+      "src/mastra/index.ts"
+    ],
+    "activity": [
+      "reading src/mastra/index.ts"
+    ],
+    "question": "I see you're registering your agents centrally in `src/mastra/index.ts`. Why did you choose this central registration approach instead of instantiating agents where they are needed?"
+  },
+  {
+    "fixture": "viva",
+    "round": "deep-dive",
+    "filesRead": [
+      "src/lib/interview/prompts.ts"
+    ],
+    "activity": [
+      "reading src/lib/interview/prompts.ts",
+      "reading src/lib/interview/prompts.ts"
+    ],
+    "question": "Your Entire session shows an AI agent wrote src/lib/interview/prompts.ts (the prompt was: \"1,2 isdone lets skip teh devrealy install, render and eleven labs credits i will claim, yep lets do stacked prs\"). In `src/lib/interview/prompts.ts`, explain how the `briefPrompt` function structures the input for the LLM. Why did you include a `correction` field in that prompt?"
+  },
+  {
+    "fixture": "viva",
+    "round": "failure-scale",
+    "filesRead": [
+      "src/lib/llm/structured.ts"
+    ],
+    "activity": [
+      "reading src/lib/llm/structured.ts",
+      "reading src/lib/llm/structured.ts"
+    ],
+    "question": "In `src/lib/llm/structured.ts`, you attempt to repair a failed JSON output exactly once before returning a fallback. What happens if the model fails the second attempt, and how do you ensure this doesn't compromise the interview state?"
+  }
+]

@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-04T05:20:52.476Z",
+  "provider": "hosted",
+  "model": "gemma-4-26b-a4b-it",
+  "fixtures": [
+    "viva"
+  ],
+  "mainQuestions": 5,
+  "modelCalls": 60,
+  "validAfterRepair": "60/60 (100%)",
+  "neededRepair": "2/60 (3%)",
+  "deepDiveNamesRealFile": "3/3 (100%)",
+  "interviewsWithAiCodeQuestion": "3/3 (100%)",
+  "agentOpenedAFile": "9/9 (100%)",
+  "agentRefusedInventedPath": 0,
+  "inventedPathsDropped": {
+    "inBriefs": 0,
+    "inQuestions": 0
+  },
+  "followUpQuoteFoundInAnswer": "25/26 (96%)",
+  "averageScore": {
+    "good": "2.82",
+    "vague": "0.00",
+    "wrong": "0.00"
+  },
+  "rateLimitedCalls": "1/60 (2%)",
+  "callsThatWaitedForBudget": "16/60 (27%)",
+  "inputTokens": 131130,
+  "medianMs": {
+    "brief": 27825,
+    "question": 7613,
+    "evaluation": 5280,
+    "report": 16066
+  },
+  "errors": []
+}

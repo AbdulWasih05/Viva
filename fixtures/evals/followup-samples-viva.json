@@ -1,0 +1,210 @@
+[
+  {
+    "fixture": "viva",
+    "candidate": "good",
+    "question": "Walk me through Viva. What problem are you solving, who is the target user, and how did you architect the system?",
+    "answer": "Viva automates technical screening for hiring managers by transforming static code repositories into interactive, AI-driven interview sessions. I architected the system using Next.js for the frontend and Mastra to manage the orchestration of LLM workflows, leveraging `@mastra/memory` and LibSQL to maintain conversational context during interviews. I chose Mastra over a simple OpenAI API implementation because it provides a more robust framework for handling complex agentic workflows and long-term memory. One trade-off was opting for a managed agent framework which increased initial complexity, whereas a custom-built RAG pipeline might have offered more granular control over document ingestion.",
+    "followUp": "You mentioned using a state machine for managing the interview flow; how exactly does that prevent the LLM from deviating from the intended interview structure?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "good",
+    "question": "You mentioned using a state machine for managing the interview flow; how exactly does that prevent the LLM from deviating from the intended interview structure?",
+    "answer": "I used Mastra's state machine to define explicit transitions between stages like 'Code Ingestion,' 'Briefing,' and 'Q&A,' which restricts the LLM to a specific set of tool calls and prompts relevant only to the current state. By decoupling the conversational logic from the LLM's raw output, the state machine acts as a guardrail that prevents the model from jumping ahead to evaluation before the technical assessment is complete. One trade-off was that a strictly deterministic state machine can feel less fluid for the candidate compared to a fully autonomous agent, so I had to carefully design 'soft' transition triggers to allow for natural follow-up questions.",
+    "followUp": "You mentioned designing 'soft' transition triggers; how are these implemented to ensure they don't break the deterministic nature of the state machine?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "good",
+    "question": "Your Entire session shows an AI agent wrote src/lib/interview/prompts.ts (the prompt was: \"1,2 isdone lets skip teh devrealy install, render and eleven labs credits i will claim, yep lets do stacked prs\"). In `src/lib/interview/prompts.ts`, how does the `briefPrompt` function ensure that the LLM generates accurate information about the project's files and structure?",
+    "answer": "I implemented the `briefPrompt` function to strictly anchor the LLM to the provided repository structure by explicitly passing a list of all file paths and their contents. To prevent hallucinations, I added specific instructions requiring the LLM to copy file paths exactly from that list and forbade it from inventing functions or features. One trade-off I made was the `MAX_PATHS_IN_PROMPT` limit of 150 files; while this prevents context window flooding and keeps costs down, it means very large repositories might not have their entire structure fully analyzed in a single prompt.",
+    "followUp": "When a repository exceeds your \"MAX_PATHS_IN_PROMPT limit of 150 files\", how do you ensure the generated brief remains useful rather than just being a partial, potentially misleading summary?",
+    "quoteFound": false
+  },
+  {
+    "fixture": "viva",
+    "candidate": "good",
+    "question": "When a repository exceeds your \"MAX_PATHS_IN_PROMPT limit of 150 files\", how do you ensure the generated brief remains useful rather than just being a partial, potentially misleading summary?",
+    "answer": "To handle large repositories, I implemented a hierarchical summarization strategy where I first group files by directory and generate individual module summaries before synthesizing them into a final project brief. This approach ensures that the context remains coherent and structurally accurate even when the raw file count exceeds the context window. A trade-off of this method is the increased latency and token cost associated with multiple LLM calls, but the alternative of simple top-level file sampling would have resulted in losing critical logic buried in deep subdirectories.",
+    "followUp": "How does your hierarchical strategy prevent the LLM from hallucinating file paths or logic that wasn't in the original input?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "good",
+    "question": "In `src/lib/llm/structured.ts`, you only allow for one repair attempt before returning a fallback value. What happens to the user experience if the model consistently fails to satisfy the Zod schema even after that second attempt?",
+    "answer": "If the model fails both the initial attempt and the single repair attempt, the system returns a predefined fallback value to ensure the UI never crashes, adhering to our core reliability rule. This prevents the entire interview session from breaking, which is critical for maintaining a smooth candidate experience. I chose this limited retry strategy to prevent infinite loops and excessive latency; an alternative would have been an exponential backoff retry mechanism, but that could have made the interview feel unresponsive due to long waiting periods.",
+    "followUp": "You mentioned a 'predefined fallback value' is returned; how does the system track if these fallbacks are actually being triggered during a session?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "good",
+    "question": "You mentioned a 'predefined fallback value' is returned; how does the system track if these fallbacks are actually being triggered during a session?",
+    "answer": "I implemented observability by wrapping our Mastra agent calls in a custom monitoring utility that checks for specific sentinel values or schema validation failures via Zod. When the system detects a fallback is being returned, it triggers a logging event to our LibSQL database alongside the session ID and the last successful prompt context. One trade-off was choosing simple database logging over a full-scale observability suite like LangSmith, which kept our initial deployment lean but makes complex trace analysis more manual.",
+    "followUp": "You mentioned checking for sentinel values, but how does the actual data structure passed to the UI indicate that a fallback was used instead of real data?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "vague",
+    "question": "Walk me through this project. What exactly does it do, who is the intended user, and what is the high-level architecture?",
+    "answer": "It basically just works, I used it because everyone uses it and it is the best option.",
+    "followUp": "You mentioned you used your current stack because 'everyone uses it'; why exactly is that the best option for this specific project's architecture?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "vague",
+    "question": "You mentioned you used your current stack because 'everyone uses it'; why exactly is that the best option for this specific project's architecture?",
+    "answer": "I followed a tutorial for that part, it handles everything automatically so I did not need to think about it much.",
+    "followUp": "Since you mentioned a tutorial \"handles everything automatically\", what specific logic or components from that tutorial are actually necessary for the interview orchestration?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "vague",
+    "question": "In src/mastra/index.ts, you're registering the interviewer agent directly within the Mastra instance. Why did you choose this centralized registration instead of instantiating agents locally where they are needed?",
+    "answer": "It basically just works, I used it because everyone uses it and it is the best option.",
+    "followUp": "When you say it is 'the best option', what specific technical requirement or architectural constraint of this project led you to that conclusion?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "vague",
+    "question": "When you say it is 'the best option', what specific technical requirement or architectural constraint of this project led you to that conclusion?",
+    "answer": "I followed a tutorial for that part, it handles everything automatically so I did not need to think about it much.",
+    "followUp": "If you didn't need to think about it, can you explain what specific orchestration or memory management tasks the tutorial's implementation was handling for you?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "vague",
+    "question": "Your Entire session shows an AI agent wrote src/lib/interview/prompts.ts (the prompt was: \"1,2 isdone lets skip teh devrealy install, render and eleven labs credits i will claim, yep lets do stacked prs\"). In `src/lib/interview/prompts.ts`, how does the `briefPrompt` function construct its instructions for the LLM? Specifically, how does it handle file contents and candidate corrections?",
+    "answer": "It basically just works, I used it because everyone uses it and it is the best option.",
+    "followUp": "I didn't ask for a popularity contest; explain the actual logic inside the briefPrompt function in src/lib/interview/prompts.ts.",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "vague",
+    "question": "I didn't ask for a popularity contest; explain the actual logic inside the briefPrompt function in src/lib/interview/prompts.ts.",
+    "answer": "I followed a tutorial for that part, it handles everything automatically so I did not need to think about it much.",
+    "followUp": "If you followed a tutorial, explain the specific mechanism the tutorial used to map file contents to the prompt using input.filePaths and input.contents.",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "vague",
+    "question": "In src/lib/llm/structured.ts, you attempt a retry if the first response fails validation. What happens if the second attempt also fails to match the Zod schema?",
+    "answer": "It basically just works, I used it because everyone uses it and it is the best option.",
+    "followUp": "Regarding your claim that it 'just works', what specific error handling logic exists in src/lib/llm/structured.ts when the Zod validation fails twice?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "vague",
+    "question": "Regarding your claim that it 'just works', what specific error handling logic exists in src/lib/llm/structured.ts when the Zod validation fails twice?",
+    "answer": "I followed a tutorial for that part, it handles everything automatically so I did not need to think about it much.",
+    "followUp": "If you didn't implement the logic, what exactly does the code in src/lib/llm/structured.ts do when the validation fails?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "vague",
+    "question": "We are out of time. If you had another month to work on this, what specific technical debt or architectural limitation would you address first, and why?",
+    "answer": "It basically just works, I used it because everyone uses it and it is the best option.",
+    "followUp": "You said it 'basically just works', but what is one specific technical component or risk, like the rate limiting or model consistency issues, that you are actually worried about?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "vague",
+    "question": "You said it 'basically just works', but what is one specific technical component or risk, like the rate limiting or model consistency issues, that you are actually worried about?",
+    "answer": "I followed a tutorial for that part, it handles everything automatically so I did not need to think about it much.",
+    "followUp": "Which specific tutorial did you follow, and what are the underlying mechanisms it uses to handle that part of the system?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "wrong",
+    "question": "Walk me through Viva. Tell me what it actually does, who the intended user is, and the high-level architecture of how you built it.",
+    "answer": "It stores everything on the blockchain so it can never fail or lose data, which is why I did not add any error handling.",
+    "followUp": "Where in your project files is the blockchain implementation or the integration logic for this storage layer?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "wrong",
+    "question": "Where in your project files is the blockchain implementation or the integration logic for this storage layer?",
+    "answer": "The frontend talks directly to the database with SQL, so there is no backend or API involved at all.",
+    "followUp": "If the frontend talks directly to the database, how are you handling the sensitive LLM orchestration and agentic logic provided by Mastra?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "wrong",
+    "question": "I see you're registering your agents centrally in `src/mastra/index.ts`. Why did you choose this central registration approach instead of instantiating agents where they are needed?",
+    "answer": "It stores everything on the blockchain so it can never fail or lose data, which is why I did not add any error handling.",
+    "followUp": "Where in your codebase or project description is this blockchain mentioned, and how does it relate to the Mastra orchestration you're using?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "wrong",
+    "question": "Where in your codebase or project description is this blockchain mentioned, and how does it relate to the Mastra orchestration you're using?",
+    "answer": "The frontend talks directly to the database with SQL, so there is no backend or API involved at all.",
+    "followUp": "How is the frontend performing direct SQL queries without a backend, and what security risks does this architecture introduce?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "wrong",
+    "question": "Your Entire session shows an AI agent wrote src/lib/interview/prompts.ts (the prompt was: \"1,2 isdone lets skip teh devrealy install, render and eleven labs credits i will claim, yep lets do stacked prs\"). In `src/lib/interview/prompts.ts`, explain how the `briefPrompt` function structures the input for the LLM. Why did you include a `correction` field in that prompt?",
+    "answer": "It stores everything on the blockchain so it can never fail or lose data, which is why I did not add any error handling.",
+    "followUp": "Where in your project stack is this blockchain actually implemented, and how does it interface with @mastra/libsql?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "wrong",
+    "question": "Where in your project stack is this blockchain actually implemented, and how does it interface with @mastra/libsql?",
+    "answer": "The frontend talks directly to the database with SQL, so there is no backend or API involved at all.",
+    "followUp": "If the frontend is communicating directly with the database via SQL, how are you handling sensitive database credentials and preventing client-side SQL injection?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "wrong",
+    "question": "In `src/lib/llm/structured.ts`, you attempt to repair a failed JSON output exactly once before returning a fallback. What happens if the model fails the second attempt, and how do you ensure this doesn't compromise the interview state?",
+    "answer": "It stores everything on the blockchain so it can never fail or lose data, which is why I did not add any error handling.",
+    "followUp": "There is no blockchain implementation in this project; which specific database or storage mechanism are you actually using to persist the interview state?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "wrong",
+    "question": "There is no blockchain implementation in this project; which specific database or storage mechanism are you actually using to persist the interview state?",
+    "answer": "The frontend talks directly to the database with SQL, so there is no backend or API involved at all.",
+    "followUp": "How does a Next.js frontend securely communicate directly with a SQL database without an API or backend layer?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "wrong",
+    "question": "We're done here. If you had another month to work on this, what specific architectural change would you prioritize and why?",
+    "answer": "It stores everything on the blockchain so it can never fail or lose data, which is why I did not add any error handling.",
+    "followUp": "Why would implementing a blockchain be a better architectural choice for this specific stack than standard database persistence, and how does that justify skipping error handling?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "viva",
+    "candidate": "wrong",
+    "question": "Why would implementing a blockchain be a better architectural choice for this specific stack than standard database persistence, and how does that justify skipping error handling?",
+    "answer": "The frontend talks directly to the database with SQL, so there is no backend or API involved at all.",
+    "followUp": "Your project uses Next.js and @mastra/libsql; how exactly is the frontend communicating with SQL without an API layer or server-side component?",
+    "quoteFound": true
+  }
+]
