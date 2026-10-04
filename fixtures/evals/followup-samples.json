@@ -2,345 +2,409 @@
   {
     "fixture": "portfolio-new",
     "candidate": "good",
+    "question": "Walk me through this project: what is it actually doing, who is the intended user, and what does your technical stack look like?",
+    "answer": "I built this high-performance portfolio website to serve as a centralized, SEO-optimized showcase for my professional work, primarily targeting recruiters and hiring managers. The application leverages a modern stack of React 18, TypeScript, and Vite for a fast development cycle and type safety, while using Tailwind CSS and Radix UI to ensure a highly accessible, minimalist design. I chose Vite over Create React App to significantly reduce build times and improve the hot module replacement experience during development. One trade-off I made was choosing Client-Side Rendering (CSR) for simplicity and rapid deployment on Netlify, though I considered using Next.js if I required more advanced Server-Side Rendering for even better initial load SEO.",
+    "followUp": "You mentioned using Client-Side Rendering for simplicity, but how do you plan to mitigate the SEO disadvantages you admitted to by not using Next.js?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "portfolio-new",
+    "candidate": "good",
+    "question": "You mentioned using Client-Side Rendering for simplicity, but how do you plan to mitigate the SEO disadvantages you admitted to by not using Next.js?",
+    "answer": "To mitigate SEO challenges inherent in a CSR approach, I implemented high-quality semantic HTML and utilized `react-helmet-async` to manage dynamic meta tags for each project page. I also focused heavily on optimizing my Core Web Vitals, specifically LCP and FID, through Vite's efficient bundling and aggressive asset optimization to ensure search engine crawlers can easily parse the content. One trade-off was choosing this over Next.js's built-in Server-Side Rendering, which would have provided better out-of-the-box indexing but would have introduced significantly more architectural complexity for a relatively static portfolio.",
+    "followUp": "You mentioned 'aggressive asset optimization' through Vite; what specific asset-related optimizations did you implement to improve LCP?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "portfolio-new",
+    "candidate": "good",
     "question": "If you had another month to work on this, what specific technical debt or architectural limitation would you address first, and why?",
-    "answer": "If I had another month, I would prioritize implementing a headless CMS like Sanity or Contentful to decouple my project content from the source code. Currently, adding or updating a project requires a code change and a full redeployment, which limits scalability and content autonomy. While the current hard-coded approach keeps the initial bundle size extremely small and avoids external API latency, moving to a CMS would provide a much more professional and scalable content management workflow.",
-    "followUp": "You mentioned avoiding external API latency; how would you handle the increased load time for a user on a slow connection when fetching that CMS data?",
+    "answer": "If I had another month, I would transition the architecture from a standard Single Page Application (SPA) to a framework like Next.js to implement Server-Side Rendering (SSR). While the current Vite setup provides an incredibly fast development experience and rapid client-side transitions, the lack of pre-rendered HTML limits my ability to optimize for search engine crawlers and initial load performance. Implementing SSR would solve these SEO challenges, though it would introduce the trade-off of increased architectural complexity and a more rigid deployment pipeline compared to my current static hosting on Netlify.",
+    "followUp": "You mentioned the current setup provides rapid client-side transitions; how exactly would moving to SSR affect the perceived performance of those transitions?",
     "quoteFound": true
   },
   {
     "fixture": "portfolio-new",
     "candidate": "good",
-    "question": "You mentioned avoiding external API latency; how would you handle the increased load time for a user on a slow connection when fetching that CMS data?",
-    "answer": "To mitigate latency on slow connections, I would implement static site generation (SSG) via a build-time fetch of the CMS data, ensuring the content is bundled directly with the production build. This approach eliminates the need for client-side data fetching entirely, allowing the user to receive a fully rendered HTML page instantly. One trade-off of this strategy is that any updates made in the CMS require a new deployment trigger to reflect changes, whereas a client-side fetching approach would provide real-time data updates.",
-    "followUp": "If you move to a CMS-based SSG approach, how will you handle the existing issue where src/data/projects.ts is bloating your bundle size?",
+    "question": "You mentioned the current setup provides rapid client-side transitions; how exactly would moving to SSR affect the perceived performance of those transitions?",
+    "answer": "Moving to SSR would improve the initial Time to First Byte and Largest Contentful Paint by delivering pre-rendered HTML, but it could introduce a delay in transition responsiveness due to the overhead of server requests. While the initial page load would feel much faster, the client-side transitions currently handled by React Router would be replaced by full or partial re-renders that depend on server latency. I chose a pure SPA approach with Vite to prioritize instantaneous, zero-latency navigation after the initial load, though a framework like Next.js would have been a strong alternative if SEO-driven initial loading was the primary bottleneck.",
+    "followUp": "You mentioned that 'client-side transitions currently handled by React Router' provide zero-latency navigation; how does your current reliance on location.state for targetId affect that reliability?",
     "quoteFound": true
   },
   {
     "fixture": "portfolio-new",
     "candidate": "vague",
-    "question": "Walk me through this portfolio project. What problem does it solve, who is the target audience, and what is the high-level architecture?",
+    "question": "Walk me through this portfolio project. What is its primary purpose, who is the intended audience, and what is your high-level technical architecture?",
     "answer": "It basically just works, I used it because everyone uses it and it is the best option.",
-    "followUp": "You said you used your stack because it is 'the best option'; what specific technical requirements or constraints led you to that conclusion?",
+    "followUp": "You mentioned you used your stack because it is the 'best option', but what specific technical requirements of this project necessitated those particular tools?",
     "quoteFound": true
   },
   {
     "fixture": "portfolio-new",
     "candidate": "vague",
-    "question": "You said you used your stack because it is 'the best option'; what specific technical requirements or constraints led you to that conclusion?",
+    "question": "You mentioned you used your stack because it is the 'best option', but what specific technical requirements of this project necessitated those particular tools?",
     "answer": "I followed a tutorial for that part, it handles everything automatically so I did not need to think about it much.",
-    "followUp": "Since you followed a tutorial, which specific technical constraints were you actually trying to solve with the tools it provided?",
+    "followUp": "If you simply followed a tutorial, what specific technical requirements or performance goals were you actually trying to meet with this project?",
     "quoteFound": true
   },
   {
     "fixture": "portfolio-new",
     "candidate": "vague",
-    "question": "In src/App.tsx, you used createBrowserRouter instead of the traditional BrowserRouter component. Why did you make that specific choice and what was the alternative?",
+    "question": "In src/App.tsx, you opted for createBrowserRouter and explicitly enabled v7 future flags. Why did you choose this approach instead of the standard BrowserRouter, and what would have happened if you hadn't?",
     "answer": "It basically just works, I used it because everyone uses it and it is the best option.",
-    "followUp": "You say it is the 'best option', but what specific technical capabilities does createBrowserRouter provide that the traditional BrowserRouter does not?",
+    "followUp": "When you say it is 'the best option', what specific technical capabilities does createBrowserRouter provide that BrowserRouter lacks?",
     "quoteFound": true
   },
   {
     "fixture": "portfolio-new",
     "candidate": "vague",
-    "question": "You say it is the 'best option', but what specific technical capabilities does createBrowserRouter provide that the traditional BrowserRouter does not?",
+    "question": "When you say it is 'the best option', what specific technical capabilities does createBrowserRouter provide that BrowserRouter lacks?",
     "answer": "I followed a tutorial for that part, it handles everything automatically so I did not need to think about it much.",
-    "followUp": "If you didn't choose it for its specific technical capabilities, why should I trust that this architecture is actually appropriate for this project?",
+    "followUp": "If you didn't need to think about it, why did you choose that specific routing method instead of the standard BrowserRouter?",
     "quoteFound": true
   },
   {
     "fixture": "portfolio-new",
     "candidate": "vague",
-    "question": "In src/data/projects.ts, you have a slugify function. How does this specific implementation ensure URL consistency across your routing?",
+    "question": "In src/data/projects.ts, you implemented a custom slugify function to generate project URLs. Walk me through the specific transformations this function performs and explain why this manual implementation is necessary for your routing logic.",
     "answer": "It basically just works, I used it because everyone uses it and it is the best option.",
-    "followUp": "You said it is the 'best option,' but what specific logic is inside that function to actually transform a raw project title into a valid URL slug?",
+    "followUp": "You said it is 'the best option,' but what specific transformations does the function in src/data/projects.ts actually perform on a string?",
     "quoteFound": true
   },
   {
     "fixture": "portfolio-new",
     "candidate": "vague",
-    "question": "You said it is the 'best option,' but what specific logic is inside that function to actually transform a raw project title into a valid URL slug?",
+    "question": "You said it is 'the best option,' but what specific transformations does the function in src/data/projects.ts actually perform on a string?",
     "answer": "I followed a tutorial for that part, it handles everything automatically so I did not need to think about it much.",
-    "followUp": "If you didn't implement it, can you at least explain what that tutorial's logic was actually doing to the string?",
+    "followUp": "If you didn't write the logic yourself, what does the regex in that function actually do to the string?",
     "quoteFound": true
   },
   {
     "fixture": "portfolio-new",
     "candidate": "vague",
-    "question": "In src/App.tsx, you used 'as any' for the v7_startTransition prop in RouterProvider. What are the specific risks of bypassing TypeScript's type checking here?",
+    "question": "In src/pages/ProjectDetailPage.tsx, you are injecting JSON-LD structured data via Helmet. How do you know that search engine crawlers will actually see this data if the page is rendered on the client side?",
     "answer": "It basically just works, I used it because everyone uses it and it is the best option.",
-    "followUp": "You said it is 'the best option', but how does bypassing type safety in src/App.tsx improve the long-term maintainability of your code?",
+    "followUp": "You said it's the 'best option' because 'everyone uses it'; explain specifically how a crawler like Bingbot handles the JavaScript execution required to see that JSON-LD.",
     "quoteFound": true
   },
   {
     "fixture": "portfolio-new",
     "candidate": "vague",
-    "question": "You said it is 'the best option', but how does bypassing type safety in src/App.tsx improve the long-term maintainability of your code?",
+    "question": "You said it's the 'best option' because 'everyone uses it'; explain specifically how a crawler like Bingbot handles the JavaScript execution required to see that JSON-LD.",
     "answer": "I followed a tutorial for that part, it handles everything automatically so I did not need to think about it much.",
-    "followUp": "If you rely on a tutorial without understanding the underlying implementation, how do you ensure that your code won't fail at runtime when the library updates?",
+    "followUp": "If you didn't think about it, what exactly does that tutorial's method do to the HTML source code that a crawler sees before any JavaScript runs?",
     "quoteFound": true
   },
   {
     "fixture": "portfolio-new",
     "candidate": "vague",
-    "question": "If you had another month to work on this, what specific technical debt or architectural limitations would you address first, and why?",
+    "question": "If you had another month to work on this, what specific technical improvement would you make to the project and why? Explain how that change would impact your current architecture.",
     "answer": "It basically just works, I used it because everyone uses it and it is the best option.",
-    "followUp": "You mentioned it 'just works', but identify one specific technical weakness in your current implementation that could fail as you scale.",
+    "followUp": "You mentioned using tools because 'everyone uses it'; what is one specific technical limitation in your current stack that you would solve if you weren't just following the crowd?",
     "quoteFound": true
   },
   {
     "fixture": "portfolio-new",
     "candidate": "vague",
-    "question": "You mentioned it 'just works', but identify one specific technical weakness in your current implementation that could fail as you scale.",
+    "question": "You mentioned using tools because 'everyone uses it'; what is one specific technical limitation in your current stack that you would solve if you weren't just following the crowd?",
     "answer": "I followed a tutorial for that part, it handles everything automatically so I did not need to think about it much.",
-    "followUp": "If you followed a tutorial for the routing setup, what specific part of the implementation in src/App.tsx is currently bypassing TypeScript safety?",
+    "followUp": "If you didn't follow that tutorial, what specific part of your current architecture—like the client-side rendering or the state management—would you have investigated first?",
     "quoteFound": true
   },
   {
     "fixture": "portfolio-new",
     "candidate": "wrong",
-    "question": "In src/App.tsx, why did you choose createBrowserRouter over the standard BrowserRouter component? What would have happened if you had stayed with the traditional approach?",
-    "answer": "The frontend talks directly to the database with SQL, so there is no backend or API involved at all.",
-    "followUp": "How exactly does a browser-based frontend execute SQL queries directly against a database without an intermediary API or backend layer?",
-    "quoteFound": true
-  },
-  {
-    "fixture": "portfolio-new",
-    "candidate": "wrong",
-    "question": "In src/data/projects.ts, explain the logic of your slugify function. How does it ensure that different components stay synchronized when resolving project routes?",
+    "question": "Walk me through this project. What is the core purpose, who is the intended user, and how did you architect the technical stack?",
     "answer": "It stores everything on the blockchain so it can never fail or lose data, which is why I did not add any error handling.",
-    "followUp": "Where in the files you provided is the blockchain implementation actually located?",
+    "followUp": "Where in your project files or stack is the blockchain implementation you are referring to?",
     "quoteFound": true
   },
   {
     "fixture": "portfolio-new",
     "candidate": "wrong",
-    "question": "Where in the files you provided is the blockchain implementation actually located?",
+    "question": "Where in your project files or stack is the blockchain implementation you are referring to?",
     "answer": "The frontend talks directly to the database with SQL, so there is no backend or API involved at all.",
-    "followUp": "How is a client-side React application performing direct SQL queries to a database without an intermediary API or backend layer?",
+    "followUp": "How does a frontend application securely connect to a SQL database without an intermediate API or backend layer?",
     "quoteFound": true
   },
   {
     "fixture": "portfolio-new",
     "candidate": "wrong",
-    "question": "In src/App.tsx, you used 'as any' for the v7_startTransition prop in RouterProvider. What is the technical implication of bypassing TypeScript's safety here?",
+    "question": "In src/App.tsx, you opted for createBrowserRouter instead of the traditional BrowserRouter pattern. Why did you make this choice now, and what would have been the downside of sticking to the simpler approach?",
     "answer": "It stores everything on the blockchain so it can never fail or lose data, which is why I did not add any error handling.",
-    "followUp": "Where in this project's stack or file structure is the blockchain implemented?",
+    "followUp": "Where in this project is the blockchain you are referring to, and how does it interact with your React code?",
     "quoteFound": true
   },
   {
     "fixture": "portfolio-new",
     "candidate": "wrong",
-    "question": "Where in this project's stack or file structure is the blockchain implemented?",
+    "question": "Where in this project is the blockchain you are referring to, and how does it interact with your React code?",
     "answer": "The frontend talks directly to the database with SQL, so there is no backend or API involved at all.",
-    "followUp": "Which SQL database are you referring to, and how is the frontend making direct connections to it?",
+    "followUp": "How is a client-side React application securely communicating with a SQL database without an intermediary API or backend?",
     "quoteFound": true
   },
   {
     "fixture": "portfolio-new",
     "candidate": "wrong",
-    "question": "If you had another month to work on this, what specific architectural changes would you make to address the risks in your current implementation? Why would these changes be necessary?",
+    "question": "In src/data/projects.ts, you use a slugify function to generate URLs for your projects. How does this specific regex implementation handle special characters, and what happens if two projects end up with the same slug?",
     "answer": "It stores everything on the blockchain so it can never fail or lose data, which is why I did not add any error handling.",
-    "followUp": "Where in this project's current file structure is the blockchain integration implemented, and how does it interact with src/data/projects.ts?",
+    "followUp": "This project is a React website hosted on Netlify; where exactly is the blockchain integration you are referring to?",
     "quoteFound": true
   },
   {
     "fixture": "portfolio-new",
     "candidate": "wrong",
-    "question": "Where in this project's current file structure is the blockchain integration implemented, and how does it interact with src/data/projects.ts?",
+    "question": "This project is a React website hosted on Netlify; where exactly is the blockchain integration you are referring to?",
     "answer": "The frontend talks directly to the database with SQL, so there is no backend or API involved at all.",
-    "followUp": "Explain the technical mechanism that allows a client-side React application to execute SQL queries against a database without an intermediate API or backend layer.",
+    "followUp": "How exactly does a client-side React application establish a direct connection to a SQL database without a backend intermediary?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "portfolio-new",
+    "candidate": "wrong",
+    "question": "In src/pages/ProjectDetailPage.tsx, you inject JSON-LD structured data using react-helmet-async. How do you ensure that search engine crawlers actually see this data if the page is rendered client-side?",
+    "answer": "It stores everything on the blockchain so it can never fail or lose data, which is why I did not add any error handling.",
+    "followUp": "Where in this project is the blockchain actually implemented, and how does it relate to the JSON-LD in src/pages/ProjectDetailPage.tsx?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "portfolio-new",
+    "candidate": "wrong",
+    "question": "Where in this project is the blockchain actually implemented, and how does it relate to the JSON-LD in src/pages/ProjectDetailPage.tsx?",
+    "answer": "The frontend talks directly to the database with SQL, so there is no backend or API involved at all.",
+    "followUp": "How is a client-side React application securely communicating with a SQL database if there is no backend or API layer?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "portfolio-new",
+    "candidate": "wrong",
+    "question": "Given the inconsistencies in your technical explanations, what is the single most critical architectural change you would make to this project if you had another month to work on it?",
+    "answer": "It stores everything on the blockchain so it can never fail or lose data, which is why I did not add any error handling.",
+    "followUp": "Where in your codebase is this blockchain integration implemented, and how are you handling the network latency or transaction failures inherent to it?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "portfolio-new",
+    "candidate": "wrong",
+    "question": "Where in your codebase is this blockchain integration implemented, and how are you handling the network latency or transaction failures inherent to it?",
+    "answer": "The frontend talks directly to the database with SQL, so there is no backend or API involved at all.",
+    "followUp": "How can you justify exposing your SQL database credentials and allowing direct client-side queries without a middle layer to secure them?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "good",
-    "question": "Walk me through VidyutMitra. Explain exactly what it does, who the target user is, and the high-level architecture of the system.",
-    "answer": "VidyutMitra is a WhatsApp-based AI advisor built for MESCOM consumers in Karnataka to help them understand complex electricity bills through text, Kannada voice notes, and infographics. The architecture uses a Python Flask backend to process bill images via Google Gemini for OCR, performs deterministic calculations for financial accuracy, and integrates Sarvam TTS for localized audio responses. I chose a WhatsApp-first approach using Twilio to lower the barrier to entry for users with low digital literacy. One trade-off I made was using a deterministic calculation engine instead of relying solely on an LLM for the math, as LLMs can hallucinate numerical values which would be unacceptable for financial advice.",
-    "followUp": "You mentioned using Twilio, but how do you prevent the system from timing out while Gemini processes the bill images?",
+    "question": "Walk me through VidyutMitra. Specifically, who is this for, what problem does it solve, and how does the technical architecture handle a user sending a bill image?",
+    "answer": "VidyutMitra is designed for MESCOM consumers in Karnataka to solve the difficulty of interpreting complex electricity bills through a WhatsApp-first interface. When a user sends a bill image, my Flask backend routes it to Google Gemini for vision-based data extraction, which is then fed into a deterministic mathematical module to ensure calculation accuracy before being converted into Kannada voice notes via Sarvam TTS. I chose a deterministic approach for the energy analysis rather than relying solely on an LLM to prevent hallucinations in critical billing math. One trade-off was using a heavy vision model like Gemini for extraction, which increased latency, whereas a lighter, fine-tuned OCR model might have provided faster processing at the cost of accuracy.",
+    "followUp": "You mentioned the use of a 'deterministic mathematical module'; how do you ensure this module remains reliable if Gemini extracts a value with a typo or incorrect decimal place?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "good",
-    "question": "You mentioned using Twilio, but how do you prevent the system from timing out while Gemini processes the bill images?",
-    "answer": "To prevent Twilio from timing out during long-running Gemini processing tasks, I implemented an asynchronous architecture using a task queue pattern where the initial WhatsApp webhook immediately returns a 200 OK response. The backend then processes the bill image in a separate worker thread, allowing the LLM to perform heavy multimodal analysis without holding the HTTP connection open. One trade-off of this approach is increased architectural complexity, as I had to manage asynchronous state updates to notify the user once the analysis was complete.",
-    "followUp": "You mentioned managing asynchronous state updates to notify the user; how exactly does the system push the final analysis back to the user on WhatsApp once the thread finishes?",
+    "question": "You mentioned the use of a 'deterministic mathematical module'; how do you ensure this module remains reliable if Gemini extracts a value with a typo or incorrect decimal place?",
+    "answer": "To ensure reliability, I implemented a validation layer that cross-references extracted values against physical constraints, such as verifying that the total amount matches the sum of the individual tariff components. If a discrepancy is detected, the system flags the data as unreliable rather than proceeding with incorrect calculations. I chose this deterministic approach over letting the LLM perform the math to avoid hallucinations, though a trade-off is that the system requires more complex error-handling logic to manage extraction failures.",
+    "followUp": "When the system 'flags the data as unreliable', how does that error state actually reach the consumer through the WhatsApp interface?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "good",
-    "question": "In `backend/output/ai_composer.py`, you use a system prompt to restrict the LLM's output format. How do you verify that the numbers the LLM includes in the headline actually match the deterministic values from the fact-pack?",
-    "answer": "I ensure numerical accuracy by decoupling the mathematical logic from the language model; all calculations are performed deterministically in my analysis modules before being passed to the LLM as a read-only JSON 'fact-pack.' To prevent the LLM from hallucinating or rounding, my system prompt explicitly mandates that currency and unit counts must be used verbatim without paraphrasing. One trade-off is that while this strict instruction-following increases prompt complexity and token usage, it is far more reliable than allowing the LLM to perform its own math, which is prone to errors.",
-    "followUp": "If the LLM ignores your instructions and returns a malformed response or a rounded number, how does the system react?",
+    "question": "In backend/analysis/subsidy_navigator.py, walk me through the logic inside the pm_surya_ghar_subsidy function. How exactly does the tiered math work for a system size of 1 kW, 3 kW, and 4 kW?",
+    "answer": "The `pm_surya_ghar_subsidy` function implements a tiered calculation to determine the MNRE subsidy based on the installed solar capacity. For a 1 kW system, it applies the base rate of ₹30,000 per kW; for 3 kW, it calculates ₹30,000 for each of the first two kW plus ₹18,000 for the third, totaling ₹78,000; and for 4 kW, it returns the capped amount of ₹78,000. I used this deterministic approach rather than an LLM-based calculation to ensure absolute financial accuracy and avoid 'hallucinated' subsidy amounts. An alternative would have been a simple linear multiplier, but that would have failed to capture the specific government policy where the subsidy rate decreases for the third kilowatt.",
+    "followUp": "You mentioned using a 'deterministic approach' to avoid magic numbers; how is this implemented in the code to ensure the rates aren't hardcoded in the logic?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "good",
-    "question": "If the LLM ignores your instructions and returns a malformed response or a rounded number, how does the system react?",
-    "answer": "To ensure accuracy, I implemented a validation layer where the LLM's output is parsed against a strict schema and cross-referenced with our deterministic Python calculation engine. If the LLM returns a malformed response or a rounded number that contradicts the logic, the system rejects the output and triggers a retry loop using a more constrained prompt. I chose this hybrid approach of combining LLM reasoning with hard-coded mathematical logic to prevent hallucinations, though a trade-off is the slight increase in latency caused by the additional validation step.",
-    "followUp": "What happens if your 'retry loop' fails multiple times or the LLM remains stuck in a pattern of incorrect rounding?",
+    "question": "You mentioned using a 'deterministic approach' to avoid magic numbers; how is this implemented in the code to ensure the rates aren't hardcoded in the logic?",
+    "answer": "To prevent hardcoding, I implemented a centralized configuration module that stores MESCOM's slab rates and fixed charges as a structured dictionary. When the Gemini vision model extracts the consumption data, the logic fetches the relevant rate tiers from this configuration to perform the mathematical calculations. One trade-off was choosing this deterministic logic over a pure LLM-based calculation; while using an LLM for the math would have been more flexible, it introduced risks of hallucinated arithmetic, so I prioritized precision for billing accuracy.",
+    "followUp": "You mentioned a centralized configuration for slab rates; walk me through exactly how the logic calculates the subsidy for a 4 kW system using those rates.",
+    "quoteFound": true
+  },
+  {
+    "fixture": "vidyut-mitra",
+    "candidate": "good",
+    "question": "In backend/db/schema.sql, you've explicitly omitted any column for storing bill images to comply with DPDPA. How do you ensure that the raw image bytes processed during extraction don't leak into logs, temporary files, or memory dumps that could be recovered later?",
+    "answer": "To prevent data leakage, I implemented a strict ephemeral processing pipeline where raw image bytes are held only in volatile memory during the Gemini vision extraction phase and are never persisted to disk or logged. I intentionally omitted any `bill_image` or URL columns in the Supabase schema to ensure the database remains a record of analyzed metrics rather than PII-heavy media. A trade-off in this approach is that we cannot re-run extraction if the LLM confidence is low, but it provides a much stronger security posture for DPDPA compliance by minimizing the attack surface for sensitive image data.",
+    "followUp": "You mentioned the bytes are held in volatile memory; how do you guarantee that an unexpected application crash won't leave sensitive data in a core dump or swap file?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "vidyut-mitra",
+    "candidate": "good",
+    "question": "You mentioned the bytes are held in volatile memory; how do you guarantee that an unexpected application crash won't leave sensitive data in a core dump or swap file?",
+    "answer": "To mitigate this, I implemented a strict lifecycle management approach where sensitive bill data is cleared from memory using explicit variable deletion and garbage collection immediately after the Twilio message is dispatched. While I used volatile memory for speed during the Gemini vision processing stage, I chose not to implement hardware-level memory encryption to keep the Flask deployment lightweight and cost-effective. An alternative approach would have been to use a secure enclave or a dedicated TEE (Trusted Execution Environment), but for this MVP, focusing on immediate memory zeroing provided a sufficient balance of security and performance.",
+    "followUp": "You mentioned avoiding application logs for this process; how specifically do you ensure that an error during the Gemini vision stage doesn't inadvertently dump the raw binary payload into your Flask logs?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "vidyut-mitra",
+    "candidate": "good",
+    "question": "If you had another month to work on this, what specific architectural change or feature would you implement next, and why would that be the priority?",
+    "answer": "If I had another month, I would prioritize implementing a RAG-based (Retrieval-Augmented Generation) knowledge base using Supabase Vector to allow users to ask complex questions about local MESCOM tariff regulations. Currently, the system relies on deterministic analysis for bill calculations, but a RAG pipeline would enable the AI to provide context-aware advice on energy-saving subsidies and regulatory changes. A major trade-off with this approach is the increased latency in response times due to the extra vector search step, but it would significantly transform the tool from a simple bill parser into a comprehensive energy consultant.",
+    "followUp": "You mentioned increased latency; how would you prevent this extra step from causing the Twilio webhook to time out?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "vague",
-    "question": "Walk me through VidyutMitra. What problem are you solving, who is the end user, and what is the high-level technical architecture?",
+    "question": "Walk me through VidyutMitra: what is the core problem you are solving, who is the target user, and how does the data flow from a WhatsApp message to a final response?",
     "answer": "It basically just works, I used it because everyone uses it and it is the best option.",
-    "followUp": "You said it 'just works,' but what is the actual technical architecture that allows a user to send a bill via WhatsApp and receive an analysis?",
+    "followUp": "You mentioned you used it because it is the best option; which specific technology are you referring to, and what specific problem does it solve in your architecture?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "vague",
-    "question": "You said it 'just works,' but what is the actual technical architecture that allows a user to send a bill via WhatsApp and receive an analysis?",
+    "question": "You mentioned you used it because it is the best option; which specific technology are you referring to, and what specific problem does it solve in your architecture?",
     "answer": "I followed a tutorial for that part, it handles everything automatically so I did not need to think about it much.",
-    "followUp": "If you followed a tutorial, explain exactly what happens from the moment a user sends a photo via Twilio to the point the analysis reaches them.",
+    "followUp": "Since you followed a tutorial, explain exactly how the communication flow works between the Twilio webhook and your Flask backend.",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "vague",
-    "question": "I noticed there is no column for bill images or URLs in backend/db/schema.sql. Why did you choose to exclude this data, and what was the alternative you rejected?",
+    "question": "I see you're using a daemon thread in `backend/app.py` to handle the bill processing pipeline. Why did you choose a simple thread instead of a dedicated task queue like Celery?",
     "answer": "It basically just works, I used it because everyone uses it and it is the best option.",
-    "followUp": "You didn't address why the images are missing from backend/db/schema.sql; can you explain the specific regulatory or privacy reasoning behind that decision?",
-    "quoteFound": false
-  },
-  {
-    "fixture": "vidyut-mitra",
-    "candidate": "vague",
-    "question": "You didn't address why the images are missing from backend/db/schema.sql; can you explain the specific regulatory or privacy reasoning behind that decision?",
-    "answer": "I followed a tutorial for that part, it handles everything automatically so I did not need to think about it much.",
-    "followUp": "If you didn't make the decision, do you actually know why the tutorial chose to omit storing those images in the database?",
+    "followUp": "What specific technical constraint in the Twilio webhook flow forced you to move the processing out of the main request-response cycle?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "vague",
-    "question": "In backend/app.py, the process_bill_and_dispatch function is called within a daemon thread. How does this function handle unexpected exceptions to ensure the user isn't left waiting indefinitely without a response?",
+    "question": "What specific technical constraint in the Twilio webhook flow forced you to move the processing out of the main request-response cycle?",
+    "answer": "I followed a tutorial for that part, it handles everything automatically so I did not need to think about it much.",
+    "followUp": "If you 'did not need to think about it much,' can you explain exactly what technical limit in the Twilio API would have caused the system to fail if you hadn't used that approach?",
+    "quoteFound": true
+  },
+  {
+    "fixture": "vidyut-mitra",
+    "candidate": "vague",
+    "question": "Walk me through the logic in `pm_surya_ghar_subsidy` in `backend/analysis/subsidy_navigator.py`. How exactly does the subsidy amount change as the system size increases?",
     "answer": "It basically just works, I used it because everyone uses it and it is the best option.",
-    "followUp": "When you say 'it basically just works', what specific mechanism prevents the user from getting no response at all if the daemon thread encounters a crash?",
+    "followUp": "I didn't ask about what 'everyone uses'; I asked for the mathematical logic in the code. Can you explain the specific tiered calculation used for the subsidy?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "vague",
-    "question": "When you say 'it basically just works', what specific mechanism prevents the user from getting no response at all if the daemon thread encounters a crash?",
+    "question": "I didn't ask about what 'everyone uses'; I asked for the mathematical logic in the code. Can you explain the specific tiered calculation used for the subsidy?",
     "answer": "I followed a tutorial for that part, it handles everything automatically so I did not need to think about it much.",
-    "followUp": "Since you didn't implement the error handling yourself, what happens to the WhatsApp user if the specific code inside that tutorial fails halfway through the processing?",
+    "followUp": "If you didn't implement the logic, how do you know the tutorial's calculation is actually accurate for MESCOM's specific tiered tariff structure?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "vague",
-    "question": "In backend/output/ai_composer.py, you claim that the AI never invents numbers. How exactly do you ensure the LLM output stays consistent with your deterministic math results?",
+    "question": "Your schema explicitly excludes a `bill_image` column to comply with DPDPA. If the image data is processed in memory, how do you guarantee those bytes aren't leaked through logs or temporary storage during a system failure?",
     "answer": "It basically just works, I used it because everyone uses it and it is the best option.",
-    "followUp": "You said 'it basically just works,' but I am asking for the technical mechanism in backend/output/ai_composer.py. How do you prevent the LLM from hallucinating a different number than the one your math modules calculated?",
+    "followUp": "I asked about data leakage and DPDPA compliance, not why you chose a specific tool. How do you ensure image bytes aren't leaked through logs or temporary storage during a system failure?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "vague",
-    "question": "You said 'it basically just works,' but I am asking for the technical mechanism in backend/output/ai_composer.py. How do you prevent the LLM from hallucinating a different number than the one your math modules calculated?",
+    "question": "I asked about data leakage and DPDPA compliance, not why you chose a specific tool. How do you ensure image bytes aren't leaked through logs or temporary storage during a system failure?",
     "answer": "I followed a tutorial for that part, it handles everything automatically so I did not need to think about it much.",
-    "followUp": "If you didn't design the logic, walk me through the actual code in backend/output/ai_composer.py—how does it receive the calculated figures before passing them to the LLM?",
+    "followUp": "Which specific tutorial or framework component are you referring to, and exactly how does it prevent image bytes from being written to application logs during a crash?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "vague",
-    "question": "Given your reliance on third-party APIs and daemon threads, what is the single most critical architectural change you would make if you had another month to stabilize this system? Explain the technical reasoning behind that change.",
+    "question": "If you had another month to work on this, what specific technical architectural change would you prioritize to make this production-ready, and why?",
     "answer": "It basically just works, I used it because everyone uses it and it is the best option.",
-    "followUp": "You haven't addressed the architectural risks I mentioned; why do you believe your current approach is sufficient for a production-grade system?",
+    "followUp": "You mentioned 'it basically just works', but what specific failure mode in your current architecture would cause it to stop working under load?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "vague",
-    "question": "You haven't addressed the architectural risks I mentioned; why do you believe your current approach is sufficient for a production-grade system?",
+    "question": "You mentioned 'it basically just works', but what specific failure mode in your current architecture would cause it to stop working under load?",
     "answer": "I followed a tutorial for that part, it handles everything automatically so I did not need to think about it much.",
-    "followUp": "Which specific tutorial are you referring to, and what mechanism does it use to prevent data loss if a daemon thread fails silently?",
+    "followUp": "Which specific part of the architecture did the tutorial cover, and what are the technical limitations of the 'automatic' solution it provided?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "wrong",
-    "question": "Walk me through VidyutMitra: what problem are you solving, who is the target user, and how does the technical architecture support this?",
+    "question": "Walk me through VidyutMitra: what problem are you solving, who is the end user, and how does the data flow from a WhatsApp message to a final response?",
     "answer": "It stores everything on the blockchain so it can never fail or lose data, which is why I did not add any error handling.",
-    "followUp": "Where in your project description or stack did you implement a blockchain, and why would that solve your data persistence needs better than Supabase?",
+    "followUp": "Where in the project's architecture is this blockchain implemented, and how does it handle the Twilio webhook response?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "wrong",
-    "question": "Where in your project description or stack did you implement a blockchain, and why would that solve your data persistence needs better than Supabase?",
+    "question": "Where in the project's architecture is this blockchain implemented, and how does it handle the Twilio webhook response?",
     "answer": "The frontend talks directly to the database with SQL, so there is no backend or API involved at all.",
-    "followUp": "If there is no backend or API, how does the frontend securely execute SQL queries against Supabase without exposing credentials?",
+    "followUp": "If there is no backend or API, how does your system perform Gemini vision extraction or process the Twilio webhooks?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "wrong",
-    "question": "Looking at backend/db/schema.sql, why did you deliberately omit any columns for storing bill images or URLs? What alternative approach did you consider for verifying the extraction accuracy against the original image?",
+    "question": "In backend/app.py, you use a daemon thread to run the bill processing pipeline. Why did you choose this instead of a robust task queue like Celery?",
     "answer": "It stores everything on the blockchain so it can never fail or lose data, which is why I did not add any error handling.",
-    "followUp": "Where specifically in your stack is this blockchain located, and how does it satisfy the privacy requirements for sensitive user documents?",
+    "followUp": "Where in the project architecture is this blockchain implemented, and how does it interact with the Python backend?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "wrong",
-    "question": "Where specifically in your stack is this blockchain located, and how does it satisfy the privacy requirements for sensitive user documents?",
+    "question": "Where in the project architecture is this blockchain implemented, and how does it interact with the Python backend?",
     "answer": "The frontend talks directly to the database with SQL, so there is no backend or API involved at all.",
-    "followUp": "If there is no backend or API, how does your frontend securely manage database credentials and handle the complex logic required for processing bill images?",
+    "followUp": "If there is no backend or API, how does the system process bill images using Gemini or send WhatsApp messages via Twilio?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "wrong",
-    "question": "In `backend/app.py`, how does the `process_bill_and_dispatch` function ensure the user receives a response if an exception occurs during the extraction or analysis pipeline? What happens to the thread if a critical error is raised?",
+    "question": "In backend/analysis/subsidy_navigator.py, walk me through the logic of the pm_surya_ghar_subsidy function. How does it handle different system sizes and what is the maximum subsidy amount?",
     "answer": "It stores everything on the blockchain so it can never fail or lose data, which is why I did not add any error handling.",
-    "followUp": "There is no blockchain in your project stack; why did you just claim it was used for error handling?",
+    "followUp": "Where in the project files or architecture is this blockchain implementation actually located?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "wrong",
-    "question": "There is no blockchain in your project stack; why did you just claim it was used for error handling?",
+    "question": "Where in the project files or architecture is this blockchain implementation actually located?",
     "answer": "The frontend talks directly to the database with SQL, so there is no backend or API involved at all.",
-    "followUp": "If there is no backend or API, how does your frontend securely execute SQL queries without exposing your Supabase credentials to the client?",
+    "followUp": "If there is no backend or API, how is the Gemini vision extraction and the Sarvam TTS generation being triggered and secured?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "wrong",
-    "question": "In `backend/output/ai_composer.py`, how do you ensure the LLM doesn't hallucinate or round the financial figures provided in the fact-pack? What specific mechanism prevents a user from receiving incorrect monetary amounts?",
+    "question": "Your schema in backend/db/schema.sql explicitly lacks a column for storing bill images to comply with DPDPA. How do you ensure that the image bytes processed by the Gemini extraction pipeline are actually discarded and not leaked or cached elsewhere in your system?",
     "answer": "It stores everything on the blockchain so it can never fail or lose data, which is why I did not add any error handling.",
-    "followUp": "Where in the project architecture is this blockchain actually implemented, and how does it prevent the LLM in `backend/output/ai_composer.py` from hallucinating math?",
+    "followUp": "There is no blockchain in your tech stack; what exactly are you referring to when you say it 'stores everything'?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "wrong",
-    "question": "Where in the project architecture is this blockchain actually implemented, and how does it prevent the LLM in `backend/output/ai_composer.py` from hallucinating math?",
+    "question": "There is no blockchain in your tech stack; what exactly are you referring to when you say it 'stores everything'?",
     "answer": "The frontend talks directly to the database with SQL, so there is no backend or API involved at all.",
-    "followUp": "If there is no backend or API, how does the frontend execute complex Python-based logic or interact with external services like Twilio or Gemini?",
+    "followUp": "If there is no backend or API, how does your Next.js frontend securely manage database credentials and execute complex logic like calling the Gemini API?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "wrong",
-    "question": "Given the inconsistencies in your responses today, if you had another month to work on this, what specific architectural changes would you make to ensure the system is actually reliable and secure?",
+    "question": "If you had another month to work on this, what specific architectural change would you implement to move away from daemon threads towards a production-ready background worker system? Why would that be necessary for this specific use case?",
     "answer": "It stores everything on the blockchain so it can never fail or lose data, which is why I did not add any error handling.",
-    "followUp": "Why do you believe storing data on a blockchain eliminates the need for error handling in your application logic?",
+    "followUp": "There is no blockchain component in the project brief; where exactly in your codebase is this 'blockchain' implemented?",
     "quoteFound": true
   },
   {
     "fixture": "vidyut-mitra",
     "candidate": "wrong",
-    "question": "Why do you believe storing data on a blockchain eliminates the need for error handling in your application logic?",
+    "question": "There is no blockchain component in the project brief; where exactly in your codebase is this 'blockchain' implemented?",
     "answer": "The frontend talks directly to the database with SQL, so there is no backend or API involved at all.",
-    "followUp": "If the frontend is executing SQL directly, how are you securing your Supabase credentials and preventing unauthorized database access?",
+    "followUp": "If there is no backend or API, how does your Next.js frontend execute the Python logic and Gemini vision extraction described in your project brief?",
     "quoteFound": true
   }
 ]

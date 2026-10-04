@@ -32,6 +32,7 @@ import { buildReport } from "../src/lib/interview/report";
 import type { InterviewState, Question } from "../src/lib/interview/schemas";
 import { createInterviewState } from "../src/lib/interview/state";
 import { runTurn, type TurnQuality } from "../src/lib/interview/turn";
+import { createAgentDeps } from "../src/mastra/deps";
 
 const MAIN_QUESTIONS = 5;
 type Candidate = "good" | "vague" | "wrong";
@@ -93,6 +94,9 @@ async function main() {
   const samples: Sample[] = [];
   const scores: Record<Candidate, number[]> = { good: [], vague: [], wrong: [] };
   let briefInvented = 0;
+  // Main questions in the rounds where the agent has tools, with what it opened.
+  const CODE_ROUNDS = ["decisions", "deep-dive", "failure-scale"];
+  const codeQuestions: { fixture: string; round: string; filesRead: string[]; activity: string[]; question: string }[] = [];
 
   for (const name of fixtures) {
     const source = loadFixture(name);
@@ -113,7 +117,8 @@ async function main() {
         brief: briefResult.brief,
         settings: { mainQuestions: MAIN_QUESTIONS, persona: "tough" },
       });
-      const deps = { readFile: source.readFile };
+      // The Mastra interviewer agent writes the code questions; it opens files with its readFile tool.
+      const deps = createAgentDeps(source, state.settings);
 
       // Collect the quality facts and call timings of every turn.
       const collect = (result: Awaited<ReturnType<typeof runTurn>>) => {
@@ -136,6 +141,10 @@ async function main() {
         turn = await runTurn(state, answer, deps);
         collect(turn);
         if (turn.evaluation?.evaluated) scores[candidate].push(turn.evaluation.score);
+        const next = turn.nextQuestion;
+        if (next && !next.isFollowUp && CODE_ROUNDS.includes(next.round)) {
+          codeQuestions.push({ fixture: name, round: next.round, filesRead: next.filesRead, activity: turn.toolActivity, question: next.text });
+        }
         if (turn.nextQuestion?.isFollowUp) {
           const grounded = turn.quality.find((q) => q.followUpReferencesAnswer !== null)?.followUpReferencesAnswer ?? false;
           samples.push({ fixture: name, candidate, question: question.text, answer, followUp: turn.nextQuestion.text, quoteFound: grounded });
@@ -171,6 +180,8 @@ async function main() {
     validAfterRepair: percent(calls - fallbacks, calls),
     neededRepair: percent(repairs, calls),
     deepDiveNamesRealFile: percent(deepDives.filter((q) => q.questionNamesRealFile).length, deepDives.length),
+    agentOpenedAFile: percent(codeQuestions.filter((q) => q.filesRead.length > 0).length, codeQuestions.length),
+    agentRefusedInventedPath: codeQuestions.filter((q) => q.activity.some((line) => line.startsWith("refused"))).length,
     inventedPathsDropped: { inBriefs: briefInvented, inQuestions: qualities.filter((q) => q.inventedPathDropped).length },
     followUpQuoteFoundInAnswer: percent(followUps.filter((q) => q.followUpReferencesAnswer).length, followUps.length),
     averageScore: { good: average(scores.good), vague: average(scores.vague), wrong: average(scores.wrong) },
@@ -192,7 +203,9 @@ async function main() {
   writeFileSync("fixtures/evals/summary.json", JSON.stringify(summary, null, 2));
   // Follow-up samples for the manual grounding check (read 10 of them by hand).
   writeFileSync("fixtures/evals/followup-samples.json", JSON.stringify(samples, null, 2));
-  console.log(`\nSaved fixtures/evals/summary.json and ${samples.length} follow-up samples.`);
+  // What the agent opened before each code question (examples for the post).
+  writeFileSync("fixtures/evals/agent-questions.json", JSON.stringify(codeQuestions, null, 2));
+  console.log(`\nSaved fixtures/evals/summary.json, ${samples.length} follow-up samples and ${codeQuestions.length} agent questions.`);
 }
 
 main();

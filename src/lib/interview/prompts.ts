@@ -69,6 +69,7 @@ export function briefPrompt(input: { filePaths: string[]; contents: FileContent[
 // ---- questions -----------------------------------------------------------------------------
 
 const ROUND_GOALS: Record<Round, string> = {
+  retest: "Come back to a topic the candidate struggled with in their last session and test it again with a fresh, specific question.",
   overview: "Open the interview. Ask the candidate to walk you through the project: what it does, for whom, and how it is put together.",
   decisions: "Ask WHY a specific design decision was made and what alternative was considered.",
   "deep-dive": "Ask how a specific piece of the code works. Name the file. The candidate should have to explain the logic, not just describe the feature.",
@@ -108,10 +109,12 @@ export function questionPrompt(input: {
   hook?: Hook;
   /** Content of the hook's file, when there is one. */
   file?: FileContent;
-  /** A topic from a previous session to retest (Phase 2 memory). */
+  /** The weak-spot topic from last session that a "retest" question revisits. */
   retestTopic?: string;
+  /** True when the interviewer agent writes the question and can open files itself. */
+  toolsAvailable?: boolean;
 }): string {
-  const { state, round, hook, file, retestTopic } = input;
+  const { state, round, hook, file, retestTopic, toolsAvailable } = input;
   return [
     "PROJECT BRIEF:",
     formatBrief(state),
@@ -125,7 +128,9 @@ export function questionPrompt(input: {
     `THIS QUESTION'S ROUND: ${round}. ${ROUND_GOALS[round]}`,
     hook ? `ASK ABOUT THIS: (${hook.kind}) ${hook.ref}. Why it matters: ${hook.why}` : "",
     file ? `CODE FROM ${file.path}:\n${file.content}` : "",
-    retestTopic ? `The candidate struggled with "${retestTopic}" in their last session. Retest that topic now and say that you are coming back to it.` : "",
+    retestTopic ? `TOPIC TO RETEST: "${retestTopic}". Ask a new question on this topic. Do not mention the last session yourself; that sentence is added for you.` : "",
+    toolsAvailable && hook?.file ? `Open ${hook.file} with readFile before you write the question, and ask about code you actually see in it.` : "",
+    toolsAvailable && !hook?.file && round === "deep-dive" ? "Pick a central source file, open it with readFile, and ask about code you actually see in it." : "",
     "",
     "Write the next question. Do not repeat a question already asked.",
     "- text: the question, at most two sentences, spoken directly to the candidate.",

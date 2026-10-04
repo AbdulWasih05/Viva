@@ -1,31 +1,32 @@
 {
-  "summary": "VidyutMitra is a WhatsApp-first AI energy advisor designed for MESCOM consumers in Karnataka to simplify electricity bill comprehension. It uses a Python backend to extract data from bill photos, performs deterministic financial analyses, and provides responses via text, Kannada voice notes, and infographics.",
+  "summary": "VidyutMitra is a WhatsApp-first AI energy advisor designed for MESCOM consumers in Karnataka to simplify electricity bill comprehension. The system uses a Flask backend to process bill images via Gemini vision extraction, performs deterministic mathematical analysis, and delivers personalized insights via Kannada voice notes and text through Twilio.",
   "stack": [
     "Python",
     "Flask",
-    "TypeScript",
     "Next.js",
+    "TypeScript",
     "Tailwind CSS",
     "Supabase",
-    "Twilio",
     "Google Gemini",
     "Groq",
+    "Twilio",
     "Sarvam TTS"
   ],
   "components": [
     {
       "name": "Extraction Pipeline",
-      "purpose": "Uses Gemini vision models to extract structured billing data from images and validate it against a schema.",
+      "purpose": "Converts bill images into structured data using LLM vision capabilities and validates against a schema.",
       "files": [
         "backend/extraction/gemini_client.py",
         "backend/extraction/pipeline.py",
+        "backend/extraction/prompts.py",
         "backend/extraction/schema_validator.py",
-        "backend/extraction/prompts.py"
+        "backend/extraction/twilio_media.py"
       ]
     },
     {
       "name": "Analysis Engine",
-      "purpose": "Runs deterministic mathematical modules for tariff verification, subsidy eligibility, and solar ROI calculations.",
+      "purpose": "Runs deterministic modules for tariff verification, subsidy eligibility, and solar ROI calculations.",
       "files": [
         "backend/analysis/orchestrator.py",
         "backend/analysis/tariff_engine.py",
@@ -35,19 +36,27 @@
       ]
     },
     {
-      "name": "Output Dispatcher",
-      "purpose": "Composes multi-modal responses including text, Kannada TTS audio, and infographics, then sends them via Twilio.",
+      "name": "Output & Dispatcher",
+      "purpose": "Composes multi-modal responses including Kannada TTS audio, text reports, and infographics.",
       "files": [
         "backend/output/ai_composer.py",
         "backend/output/kannada_tts.py",
         "backend/output/infographic.py",
-        "backend/output/twilio_dispatcher.py",
-        "backend/output/response_composer.py"
+        "backend/output/response_composer.py",
+        "backend/output/twilio_dispatcher.py"
+      ]
+    },
+    {
+      "name": "User Management & Consent",
+      "purpose": "Handles DPDPA-compliant consent workflows and language preferences.",
+      "files": [
+        "backend/consent/consent_manager.py",
+        "backend/db/schema.sql"
       ]
     },
     {
       "name": "Web Dashboard",
-      "purpose": "A Next.js application providing a web-based chat interface and an administrative view.",
+      "purpose": "Provides a Next.js interface for web chat and an admin dashboard.",
       "files": [
         "vidyut-dashboard/app/chat/page.tsx",
         "vidyut-dashboard/app/dashboard/page.tsx",
@@ -56,72 +65,71 @@
     }
   ],
   "decisions": [
-    "Deliberate omission of bill images from the Supabase database to ensure DPDPA compliance.",
-    "Asynchronous processing of bills using daemon threads to stay within Twilio's 15-second webhook response limit.",
-    "Use of deterministic Python math for financial calculations instead of relying solely on LLM reasoning to prevent hallucinations.",
-    "Fallback to scripted/mock replies in the dashboard when a live backend is not detected."
+    "Use of a daemon thread for the processing pipeline to ensure the Twilio webhook responds within the 15-second timeout.",
+    "Deliberate exclusion of image storage (no 'bill_image' column in database) to ensure DPDPA compliance.",
+    "Hybrid approach using deterministic Python logic for math and LLMs only for contextual framing to ensure accuracy."
   ],
   "risks": [
-    "Processing time for the extraction and analysis pipeline might exceed the 15-second Twilio timeout if not handled asynchronously.",
-    "Reliance on third-party LLM providers (Gemini/Groq) for critical data extraction and framing.",
-    "Potential for high latency in generating Kannada voice notes using external TTS APIs."
+    "Processing latency: The pipeline (extraction + analysis + generation) may exceed Twilio's response window if not properly handled asynchronously.",
+    "AI Hallucination: Despite deterministic math, the AI framing could potentially misinterpret analysis results if not strictly constrained.",
+    "API Dependency: Heavy reliance on third-party APIs (Gemini, Groq, Sarvam, Twilio) for the core user experience."
   ],
   "hooks": [
     {
       "id": "h1",
       "kind": "decision",
-      "ref": "DPDPA Compliance Strategy",
-      "file": "backend/db/schema.sql",
-      "why": "Why was the decision made to explicitly exclude bill images from the database schema?"
+      "ref": "Asynchronous processing architecture",
+      "file": "backend/app.py",
+      "why": "Why was the decision made to use a daemon thread for the extraction/analysis pipeline rather than a formal task queue like Celery?"
     },
     {
       "id": "h2",
-      "kind": "function",
-      "ref": "process_bill_and_dispatch",
-      "file": "backend/app.py",
-      "why": "How does the daemon thread approach handle errors to ensure the user eventually receives a response?"
+      "kind": "risk",
+      "ref": "DPDPA Compliance via data minimization",
+      "file": "backend/db/schema.sql",
+      "why": "How do you ensure that the 'image bytes' truly go out of scope and are not leaked or cached elsewhere in the system?"
     },
     {
       "id": "h3",
-      "kind": "file",
-      "ref": "subsidy_navigator.py",
-      "file": "backend/analysis/subsidy_navigator.py",
-      "why": "How are the various subsidy tiers (PM Surya Ghar vs Gruha Jyothi) modeled and verified?"
-    },
-    {
-      "id": "h4",
-      "kind": "risk",
-      "ref": "LLM Hallucination Mitigation",
-      "file": "backend/output/ai_composer.py",
-      "why": "How is the regex sanity check implemented to ensure LLM output matches the deterministic analysis?"
-    },
-    {
-      "id": "h5",
       "kind": "function",
       "ref": "pm_surya_ghar_subsidy",
       "file": "backend/analysis/subsidy_navigator.py",
-      "why": "Can you walk through the logic for calculating the tiered subsidy amounts?"
+      "why": "Can you walk through the tiered math logic used for the PM Surya Ghar subsidy calculation?"
     },
     {
-      "id": "h6",
-      "kind": "decision",
-      "ref": "Web Chat Mocking",
-      "file": "vidyut-dashboard/app/chat/page.tsx",
-      "why": "Why is the mock-chat logic implemented directly in the frontend component?"
-    },
-    {
-      "id": "h7",
+      "id": "h4",
       "kind": "file",
       "ref": "schema_validator.py",
       "file": "backend/extraction/schema_validator.py",
-      "why": "What specific validation rules (R1-R9) are applied to the Gemini extraction output?"
+      "why": "How do you handle extraction failures when the LLM returns a schema that doesn't match your expected R1-R9 requirements?"
+    },
+    {
+      "id": "h5",
+      "kind": "decision",
+      "ref": "Deterministic math vs LLM framing",
+      "file": "backend/analysis/orchestrator.py",
+      "why": "Why did you choose to separate the math engine from the AI composer instead of using a single LLM-driven analysis?"
+    },
+    {
+      "id": "h6",
+      "kind": "function",
+      "ref": "process_bill_and_dispatch",
+      "file": "backend/app.py",
+      "why": "The function catches all exceptions to send a generic error; how do you handle observability and debugging for these silent failures?"
+    },
+    {
+      "id": "h7",
+      "kind": "risk",
+      "ref": "Twilio webhook timeout",
+      "file": "backend/app.py",
+      "why": "If the daemon thread fails after the TwiML ack is sent, how does the user know their request failed?"
     },
     {
       "id": "h8",
-      "kind": "risk",
-      "ref": "Concurrency and State",
-      "file": "backend/app.py",
-      "why": "How do the in-memory sets _FEEDBACK_WAITING and _ACCOUNT_ID_WAITING scale in a multi-worker production environment?"
+      "kind": "file",
+      "ref": "kannada_tts.py",
+      "file": "backend/output/kannada_tts.py",
+      "why": "How do you manage the local file system/temporary directories for audio files generated via Sarvam TTS?"
     }
   ]
 }

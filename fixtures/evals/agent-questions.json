@@ -1,0 +1,200 @@
+[
+  {
+    "fixture": "portfolio-new",
+    "round": "decisions",
+    "filesRead": [
+      "src/App.tsx"
+    ],
+    "activity": [
+      "reading src/App.tsx"
+    ],
+    "question": "I see you're using `createBrowserRouter` and passing `v7_startTransition` to the `RouterProvider`. Why did you choose this pattern now instead of the standard `BrowserRouter` component?"
+  },
+  {
+    "fixture": "portfolio-new",
+    "round": "deep-dive",
+    "filesRead": [
+      "src/data/projects.ts"
+    ],
+    "activity": [
+      "reading src/data/projects.ts"
+    ],
+    "question": "Explain the regex logic in your `slugify` function. How do you ensure that the generated slug will always correctly match a route defined in your router?"
+  },
+  {
+    "fixture": "portfolio-new",
+    "round": "failure-scale",
+    "filesRead": [
+      "src/pages/ProjectDetailPage.tsx"
+    ],
+    "activity": [
+      "reading src/pages/ProjectDetailPage.tsx"
+    ],
+    "question": "You are injecting JSON-LD structured data via a Helmet script tag in `ProjectDetailPage.tsx`. How can you guarantee that search engine crawlers will actually see and process this data in a client-side rendered application?"
+  },
+  {
+    "fixture": "portfolio-new",
+    "round": "decisions",
+    "filesRead": [
+      "src/App.tsx"
+    ],
+    "activity": [
+      "reading src/App.tsx"
+    ],
+    "question": "In src/App.tsx, you opted for createBrowserRouter and explicitly enabled v7 future flags. Why did you choose this approach instead of the standard BrowserRouter, and what would have happened if you hadn't?"
+  },
+  {
+    "fixture": "portfolio-new",
+    "round": "deep-dive",
+    "filesRead": [
+      "src/data/projects.ts"
+    ],
+    "activity": [
+      "reading src/data/projects.ts"
+    ],
+    "question": "In src/data/projects.ts, you implemented a custom slugify function to generate project URLs. Walk me through the specific transformations this function performs and explain why this manual implementation is necessary for your routing logic."
+  },
+  {
+    "fixture": "portfolio-new",
+    "round": "failure-scale",
+    "filesRead": [
+      "src/pages/ProjectDetailPage.tsx"
+    ],
+    "activity": [
+      "reading src/pages/ProjectDetailPage.tsx"
+    ],
+    "question": "In src/pages/ProjectDetailPage.tsx, you are injecting JSON-LD structured data via Helmet. How do you know that search engine crawlers will actually see this data if the page is rendered on the client side?"
+  },
+  {
+    "fixture": "portfolio-new",
+    "round": "decisions",
+    "filesRead": [
+      "src/App.tsx"
+    ],
+    "activity": [
+      "reading src/App.tsx"
+    ],
+    "question": "In src/App.tsx, you opted for createBrowserRouter instead of the traditional BrowserRouter pattern. Why did you make this choice now, and what would have been the downside of sticking to the simpler approach?"
+  },
+  {
+    "fixture": "portfolio-new",
+    "round": "deep-dive",
+    "filesRead": [
+      "src/data/projects.ts"
+    ],
+    "activity": [
+      "reading src/data/projects.ts"
+    ],
+    "question": "In src/data/projects.ts, you use a slugify function to generate URLs for your projects. How does this specific regex implementation handle special characters, and what happens if two projects end up with the same slug?"
+  },
+  {
+    "fixture": "portfolio-new",
+    "round": "failure-scale",
+    "filesRead": [
+      "src/pages/ProjectDetailPage.tsx"
+    ],
+    "activity": [
+      "reading src/pages/ProjectDetailPage.tsx"
+    ],
+    "question": "In src/pages/ProjectDetailPage.tsx, you inject JSON-LD structured data using react-helmet-async. How do you ensure that search engine crawlers actually see this data if the page is rendered client-side?"
+  },
+  {
+    "fixture": "vidyut-mitra",
+    "round": "decisions",
+    "filesRead": [
+      "backend/app.py"
+    ],
+    "activity": [
+      "reading backend/app.py"
+    ],
+    "question": "In backend/app.py, you use a daemon thread to handle the bill processing pipeline. Why did you choose a daemon thread instead of a formal task queue like Celery?"
+  },
+  {
+    "fixture": "vidyut-mitra",
+    "round": "deep-dive",
+    "filesRead": [
+      "backend/analysis/subsidy_navigator.py"
+    ],
+    "activity": [
+      "reading backend/analysis/subsidy_navigator.py"
+    ],
+    "question": "In backend/analysis/subsidy_navigator.py, walk me through the logic inside the pm_surya_ghar_subsidy function. How exactly does the tiered math work for a system size of 1 kW, 3 kW, and 4 kW?"
+  },
+  {
+    "fixture": "vidyut-mitra",
+    "round": "failure-scale",
+    "filesRead": [
+      "backend/db/schema.sql"
+    ],
+    "activity": [
+      "reading backend/db/schema.sql"
+    ],
+    "question": "In backend/db/schema.sql, you've explicitly omitted any column for storing bill images to comply with DPDPA. How do you ensure that the raw image bytes processed during extraction don't leak into logs, temporary files, or memory dumps that could be recovered later?"
+  },
+  {
+    "fixture": "vidyut-mitra",
+    "round": "decisions",
+    "filesRead": [
+      "backend/app.py"
+    ],
+    "activity": [
+      "reading backend/app.py"
+    ],
+    "question": "I see you're using a daemon thread in `backend/app.py` to handle the bill processing pipeline. Why did you choose a simple thread instead of a dedicated task queue like Celery?"
+  },
+  {
+    "fixture": "vidyut-mitra",
+    "round": "deep-dive",
+    "filesRead": [
+      "backend/analysis/subsidy_navigator.py"
+    ],
+    "activity": [
+      "reading backend/analysis/subsidy_navigator.py"
+    ],
+    "question": "Walk me through the logic in `pm_surya_ghar_subsidy` in `backend/analysis/subsidy_navigator.py`. How exactly does the subsidy amount change as the system size increases?"
+  },
+  {
+    "fixture": "vidyut-mitra",
+    "round": "failure-scale",
+    "filesRead": [
+      "backend/db/schema.sql"
+    ],
+    "activity": [
+      "reading backend/db/schema.sql"
+    ],
+    "question": "Your schema explicitly excludes a `bill_image` column to comply with DPDPA. If the image data is processed in memory, how do you guarantee those bytes aren't leaked through logs or temporary storage during a system failure?"
+  },
+  {
+    "fixture": "vidyut-mitra",
+    "round": "decisions",
+    "filesRead": [
+      "backend/app.py"
+    ],
+    "activity": [
+      "reading backend/app.py"
+    ],
+    "question": "In backend/app.py, you use a daemon thread to run the bill processing pipeline. Why did you choose this instead of a robust task queue like Celery?"
+  },
+  {
+    "fixture": "vidyut-mitra",
+    "round": "deep-dive",
+    "filesRead": [
+      "backend/analysis/subsidy_navigator.py"
+    ],
+    "activity": [
+      "reading backend/analysis/subsidy_navigator.py"
+    ],
+    "question": "In backend/analysis/subsidy_navigator.py, walk me through the logic of the pm_surya_ghar_subsidy function. How does it handle different system sizes and what is the maximum subsidy amount?"
+  },
+  {
+    "fixture": "vidyut-mitra",
+    "round": "failure-scale",
+    "filesRead": [
+      "backend/db/schema.sql"
+    ],
+    "activity": [
+      "reading backend/db/schema.sql"
+    ],
+    "question": "Your schema in backend/db/schema.sql explicitly lacks a column for storing bill images to comply with DPDPA. How do you ensure that the image bytes processed by the Gemini extraction pipeline are actually discarded and not leaked or cached elsewhere in your system?"
+  }
+]

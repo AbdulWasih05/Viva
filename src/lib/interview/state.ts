@@ -25,6 +25,19 @@ export function planRounds(mainQuestions: number): Round[] {
   ];
 }
 
+/** How many of last session's weak spots are retested at the start of a new session. */
+export const MAX_RETESTS = 2;
+
+export function retestCount(previousWeakSpots: WeakSpot[]): number {
+  return Math.min(MAX_RETESTS, previousWeakSpots.length);
+}
+
+/** The weak-spot topic the next retest question should revisit: the first one not retested yet. */
+export function nextRetestTopic(state: InterviewState): string | undefined {
+  const done = state.questions.filter((question) => question.round === "retest" && !question.isFollowUp).length;
+  return state.previousWeakSpots[done]?.topic;
+}
+
 export function createInterviewState(input: {
   repoId: string;
   repoLabel: string;
@@ -45,7 +58,8 @@ export function createInterviewState(input: {
     userCorrection: input.userCorrection,
     previousWeakSpots: input.previousWeakSpots ?? [],
     settings,
-    roundPlan: planRounds(settings.mainQuestions),
+    // A returning candidate first gets up to two retest questions, on top of the normal plan.
+    roundPlan: [...Array<Round>(retestCount(input.previousWeakSpots ?? [])).fill("retest"), ...planRounds(settings.mainQuestions)],
     questions: [],
     answers: [],
     evaluations: [],
@@ -112,6 +126,7 @@ export function isFinished(state: InterviewState): boolean {
 
 /** Which kinds of hook suit which round. Overview and wrap-up are asked without a hook. */
 const HOOK_KINDS_BY_ROUND: Record<Round, Hook["kind"][]> = {
+  retest: [],
   overview: [],
   decisions: ["decision"],
   "deep-dive": ["ai-authored", "function", "file"],
