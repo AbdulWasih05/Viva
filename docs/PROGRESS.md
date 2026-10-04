@@ -166,3 +166,10 @@ Verified: `pnpm typecheck`, `pnpm lint`, `pnpm test` (69 tests) and `pnpm build`
   - `/api/turn` wraps each turn in a span and, when the turn is done, writes the quality facts onto it as attributes.
   - `generateStructured` wraps each model call in a child span with time, tokens, and whether a repair or fallback was needed.
   - Only numbers, true/false values and short labels are attached. The candidate's answers never are.
+
+## 5 Oct 2026: Phase 10 material (notes, outline, Entire excerpts)
+
+- `docs/post/notes.md`: all 25 `[POST]` and 12 `[WHY]` lines from this file, grouped by phase, collected by script with the wording unchanged.
+- `docs/post/outline.md`: the post's sections with pointers to the numbers, screenshots and code for each, and the items only Wasih can fill in (the friend, the video, the live URL, Sentry screenshots).
+- `docs/post/entire/`: `entire checkpoint explain --short` output for the three checkpoints behind the "why this code exists" stories. Their summary sections are empty; `--generate` was not run. The author's email was removed from the saved text.
+- Not done here: the post itself (Wasih writes it), the video, the friend test, the deploy.

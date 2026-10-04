@@ -216,10 +216,12 @@ Voice was dropped from the app on 4 Oct to protect the core. None of the tasks b
 Writing is weighted most. Claude prepares material; Wasih writes.
 
 - [ ] **10.1** Open the official Submission Template from the challenge page; re-read rules and FAQ
-- [ ] **10.2** Collect `[POST]` and `[WHY]` lines from PROGRESS.md into `docs/post/notes.md`
+- [x] **10.2** Collect `[POST]` and `[WHY]` lines from PROGRESS.md into `docs/post/notes.md`
 - [ ] **10.3 "Why this code exists"**: pick 3 `[WHY]` pieces of code, run `entire explain` on each, save excerpts and links
+  - [x] Three stories picked and `entire checkpoint explain --short` output saved in `docs/post/entire/`
+  - [ ] AI summaries: run `entire checkpoint explain --generate <id>` for each (the saved excerpts say "Not generated yet")
 - [ ] **10.4 Agent session**: save one representative session to DEV with DevRelay for the `agent_session` embed
-- [ ] **10.5 Outline** `docs/post/outline.md`, following the template sections:
+- [x] **10.5 Outline** `docs/post/outline.md`, following the template sections:
   - What I Built: the friend, the freeze, the AI-coding era angle
   - Demo: video at the top, live link
   - Code: repo embed, Deploy to Render button
