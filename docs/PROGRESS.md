@@ -150,3 +150,19 @@ Verified: `pnpm typecheck`, `pnpm lint`, `pnpm test` (69 tests) and `pnpm build`
   - `render.yaml` tells Render how to build and start the app and which settings to ask for.
   - Each API route first counts recent requests from the caller's IP address; over the limit, it answers "try again in N minutes" without touching the model.
   - Sample repos use briefs saved in the repo, so opening one costs no model tokens.
+
+## 5 Oct 2026: voice cut, Phase 7 (minimal Sentry)
+
+What changed: voice was cut from the app (DECISIONS D78), so the mic button, the voice badge and the "How you said it" card were removed. Sentry tracing was added: server setup, a helper in `src/lib/tracing`, a span per interview turn with quality attributes, a span per model call and per file read.
+
+Verified: `pnpm typecheck`, `pnpm lint`, `pnpm test` (69 tests) and `pnpm build` pass. With a placeholder DSN and `SENTRY_DEBUG_SPANS=true`, four turns on the Portfolio sample printed 4 turn spans, 7 model-call spans and 3 tool spans to the server log, with the attributes listed in D83 and no prompt or answer text.
+
+- **Not done, needs a real `SENTRY_DSN`:** nothing has been sent to a real Sentry project. The 3 traced interviews, the screenshots and the check of Sentry's automatic spans are open (PHASES 7.4, 7.4a).
+- `[POST]` Example turn span from the local log: `gen_ai.invoke_agent "interview turn" viva.round="deep-dive" viva.question_names_real_file=true viva.tool_calls=1 viva.json_repair_used=false viva.fallback_used=false viva.score=0`.
+- `[POST]` Example model-call span: `gen_ai.chat "chat gemma-4-26b-a4b-it" viva.call="question (agent)" viva.waited_for_budget_ms=33867 gen_ai.usage.input_tokens=4929`. The 34-second wait for the free tier's token budget is visible as an attribute.
+- `[WHY]` First attempt logged nothing: Sentry SDK 11 streams spans and silently skips `beforeSendTransaction`; and `withSentryConfig` has to be imported from `@sentry/nextjs/config`.
+- **How it works (Phase 7, plain language):**
+  - When the server starts, Next.js runs `instrumentation.ts`, which loads the Sentry setup if a DSN is configured.
+  - `/api/turn` wraps each turn in a span and, when the turn is done, writes the quality facts onto it as attributes.
+  - `generateStructured` wraps each model call in a child span with time, tokens, and whether a repair or fallback was needed.
+  - Only numbers, true/false values and short labels are attached. The candidate's answers never are.

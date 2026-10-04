@@ -31,7 +31,7 @@ Challenge rules that affect the code:
 | Render (featured) | $200 | Agent frontend and API as a web service, one-click "Deploy to Render" blueprint |
 | Mastra | $100 | Interviewer agent with tools (readFile, provenance lookup) and cross-session memory of weak spots |
 | Entire | $100 | Viva reads Entire checkpoints to question AI-written code; the post explains Viva's own code via `entire explain` |
-| ElevenLabs | $100 | Voice interviews with personas, speech-to-text with timestamps for delivery coaching |
+| ElevenLabs | $100 | Narration of the demo video only; voice in the app was cut (DECISIONS D78) |
 | Sentry Agent Tracing | $100 | Traces every agent step with quality attributes (made-up file rate, JSON repair rate, follow-up grounding) |
 
 ## The working loop (follow this every session)
@@ -66,8 +66,8 @@ Challenge rules that affect the code:
 - **Memory:** Mastra memory with local file storage (for example LibSQL) in local mode only; hosted mode keeps no memory (privacy)
 - **Repo ingestion:** GitHub REST API (optional `GITHUB_TOKEN`) and local folder reading in local mode
 - **Provenance:** Entire checkpoints read from the target repo (git refs in local mode, GitHub API in hosted mode; confirm format in Phase 0)
-- **Voice:** ElevenLabs TTS (persona voices) and ElevenLabs speech-to-text with word timestamps (delivery metrics). Text mode always works without voice.
-- **Observability:** Sentry for Next.js; prefer its AI SDK / agent integration for automatic LLM spans, plus custom attributes for interview quality
+- **Voice:** none in the app (cut, DECISIONS D78). ElevenLabs only narrates the demo video.
+- **Observability:** Sentry for Next.js, server side only, off without `SENTRY_DSN`; manual `gen_ai.*` spans with `viva.*` quality attributes via `src/lib/tracing` (DECISIONS D80 to D86)
 - **Hosting:** Render blueprint (`render.yaml`): one web service that calls the hosted Gemma endpoint (no private Ollama service, DECISIONS D6); a `/api/health` route pinged every 5 minutes keeps the free instance awake (D7)
 - **Testing:** Vitest; `pnpm eval` runs the agent against fixture repos and prints quality metrics
 
@@ -131,10 +131,8 @@ HOSTED_BASE_URL=           # empty for Google; set only for an OpenAI-compatible
 OLLAMA_BASE_URL=http://localhost:11434/v1
 OLLAMA_MODEL=gemma4:e4b
 GITHUB_TOKEN=              # optional
-ELEVENLABS_API_KEY=
-ELEVENLABS_VOICE_FRIENDLY=
-ELEVENLABS_VOICE_TOUGH=
-SENTRY_DSN=
+SENTRY_DSN=                # optional; tracing is off without it
+SENTRY_DEBUG_SPANS=        # true prints AI spans to the server log
 LOCAL_MODE=true|false      # local folders + memory; must be false on Render
 MEMORY_DB_PATH=.viva/memory.db
 ```
@@ -154,7 +152,7 @@ MEMORY_DB_PATH=.viva/memory.db
 - A judge opens the Render URL, pastes a public repo, and completes a 6 to 10 question interview with a report, in text mode, without errors.
 - On a repo with Entire checkpoints, Viva asks at least one question about AI-written code and says so ("your session shows the agent wrote this").
 - Locally, a second session on the same repo opens by retesting last session's weak spots (Mastra memory).
-- Voice mode works and the report includes delivery feedback (filler words, pauses, pace).
+- ~~Voice mode works and the report includes delivery feedback~~ (cut, DECISIONS D78).
 - Sentry shows traced agent turns with quality attributes; screenshots are in `docs/post/`.
 - README covers both modes, the Deploy to Render button, privacy notes, and why open models matter.
 - `docs/post/` has the outline, demo video, narration, screenshots, traces, `entire explain` excerpts, and the friend's feedback.

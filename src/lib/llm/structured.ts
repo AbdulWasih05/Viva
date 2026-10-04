@@ -6,6 +6,7 @@
  */
 import { Agent } from "@mastra/core/agent";
 import type { z } from "zod";
+import { traced } from "../tracing";
 import { paceHostedCall } from "./pacing";
 import { getCallTimeoutMs, getModelConfig, getModelName, getProvider, providerOptions } from "./provider";
 
@@ -63,7 +64,35 @@ export function rateLimitWaitMs(errorMessage: string): number | null {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export async function generateStructured<T>(options: {
+/**
+ * Asks the model for a value of the schema's type. Traced as one "gen_ai.chat" span whose
+ * attributes say how the call went: repaired, fell back, rate limited, time, tokens.
+ */
+export async function generateStructured<T>(options: GenerateStructuredOptions<T>): Promise<{ value: T; meta: StructuredMeta }> {
+  return traced(
+    {
+      op: "gen_ai.chat",
+      name: `chat ${getModelName()}`,
+      attributes: { "gen_ai.request.model": getModelName(), "gen_ai.provider.name": getProvider(), "viva.call": options.label ?? "other" },
+    },
+    async (annotate) => {
+      const result = await runStructured(options);
+      annotate({
+        "viva.json_repair_used": result.meta.repaired,
+        "viva.fallback_used": result.meta.usedFallback,
+        "viva.rate_limited": result.meta.rateLimited,
+        "viva.waited_for_budget_ms": result.meta.pacedMs,
+        "gen_ai.usage.input_tokens": result.meta.inputTokens,
+        "gen_ai.usage.output_tokens": result.meta.outputTokens,
+      });
+      return result;
+    },
+  );
+}
+
+type GenerateStructuredOptions<T> = {
+  /** What the call is for (brief, question, evaluation, report). Shown on the trace. */
+  label?: string;
   instructions: string;
   prompt: string;
   schema: z.ZodType<T>;
@@ -76,7 +105,9 @@ export async function generateStructured<T>(options: {
   maxRateLimitWaitMs?: number;
   /** 2 by default (one repair retry). The agent path uses 1 because it has its own, cheaper plan B. */
   maxAttempts?: 1 | 2;
-}): Promise<{ value: T; meta: StructuredMeta }> {
+};
+
+async function runStructured<T>(options: GenerateStructuredOptions<T>): Promise<{ value: T; meta: StructuredMeta }> {
   const { instructions, prompt, schema, fallback, timeoutMs } = options;
   const generate = options.generate ?? mastraGenerate;
   const start = Date.now();

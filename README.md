@@ -117,8 +117,14 @@ A turn takes about 5 seconds when it ends in a follow-up and 11 to 14 seconds wh
 
 - "AI-written" means "changed in a commit that Entire linked to an agent session". Entire's per-line attribution was not usable on this repo, so Viva does not claim line-level proof.
 - Tool activity ("reading src/auth.ts") is shown after a turn finishes, not live.
-- Voice interviews and delivery coaching are not built yet.
+- There is no voice mode. It was planned and then cut to protect the core interview.
 - The hosted demo shares one model key; two visitors at once will notice waits.
+
+## Tracing (optional)
+
+Set `SENTRY_DSN` and every interview turn is traced in Sentry: one span per turn with quality attributes (did the question name a real file, did the follow-up quote the answer, was the JSON repaired, was a fallback used), one per model call with token counts, one per file the agent read. Only numbers, true/false values and short labels are sent, never prompts or answers. Without a DSN, tracing is off.
+
+Set `SENTRY_DEBUG_SPANS=true` as well to print those spans to the server log.
 
 ## Development
 
