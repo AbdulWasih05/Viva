@@ -18,14 +18,28 @@ import {
   type QuestionDraft,
   type Round,
 } from "./schemas";
-import { followUpAllowed, isFinished, nextMainStep, nextQuestionId, pendingQuestion, pickHook, shouldFollowUp } from "./state";
+import { followUpAllowed, isFinished, nextMainStep, nextQuestionId, nextRetestTopic, pendingQuestion, pickHook, shouldFollowUp } from "./state";
 
 /** What a turn needs from the outside world. Tests pass fakes for both. */
 export type TurnDeps = {
   /** Reads a file from the candidate's repo. Only ever called with a validated path. */
   readFile: (path: string) => Promise<string>;
   generate?: GenerateFn;
+  /**
+   * The Mastra interviewer agent (Phase 2). When present it writes the code-related questions
+   * and opens files itself with its readFile tool, instead of being handed a file up front.
+   */
+  agent?: {
+    generate: GenerateFn;
+    /** Files the agent opened since the last call to this function. */
+    takeFilesRead: () => string[];
+    /** Status lines ("reading src/auth.ts") since the last call to this function. */
+    takeActivity: () => string[];
+  };
 };
+
+/** Rounds where looking at code helps. Overview, retest and wrap-up are asked without tools: faster and cheaper. */
+const AGENT_ROUNDS: Round[] = ["decisions", "deep-dive", "failure-scale"];
 
 /** Per-turn quality facts. These become Sentry span attributes in Phase 7 and eval metrics now. */
 export type TurnQuality = {
@@ -41,6 +55,7 @@ export type TurnQuality = {
 
 /** Safe questions for when the model fails twice. One per round, generic but always valid. */
 const FALLBACK_QUESTIONS: Record<Round, string> = {
+  retest: "Explain this topic again in your own words, with one concrete example from your project.",
   overview: "Walk me through your project: what does it do, and how is it put together?",
   decisions: "Pick one technical decision you made in this project. Why did you choose it, and what was the alternative?",
   "deep-dive": "Pick the most complex part of your code and explain how it works, step by step.",
@@ -78,19 +93,30 @@ export async function askMainQuestion(
   state: InterviewState,
   round: Round,
   deps: TurnDeps,
-): Promise<{ question: Question; meta: StructuredMeta; quality: TurnQuality }> {
+): Promise<{ question: Question; meta: StructuredMeta; quality: TurnQuality; activity: string[] }> {
   const hook = pickHook(state, round);
-  const file = hook?.file ? await readForPrompt(deps, hook.file) : undefined;
-  // The first question of a session retests a weak spot from last time, when there is one (Phase 2 memory).
-  const retestTopic = state.questions.length === 0 ? state.previousWeakSpots[0]?.topic : undefined;
+  const agent = deps.agent && AGENT_ROUNDS.includes(round) ? deps.agent : undefined;
+  // Without the agent, the hook's file is pasted into the prompt. With it, the agent opens files itself.
+  const file = !agent && hook?.file ? await readForPrompt(deps, hook.file) : undefined;
+  const retestTopic = round === "retest" ? nextRetestTopic(state) : undefined;
+  const retestNumber = state.questions.filter((q) => q.round === "retest" && !q.isFollowUp).length;
 
   const { value: draft, meta } = await generateStructured({
     instructions: interviewerInstructions(state.settings.persona, state.settings.targetRole),
-    prompt: questionPrompt({ state, round, hook, file, retestTopic }),
+    prompt: questionPrompt({ state, round, hook, file, retestTopic, toolsAvailable: Boolean(agent) }),
     schema: QuestionDraftSchema,
     fallback: fallbackQuestion(round),
-    generate: deps.generate,
+    generate: agent ? agent.generate : deps.generate,
   });
+  const agentFiles = agent ? agent.takeFilesRead() : [];
+  const activity = agent ? agent.takeActivity() : file ? [`reading ${file.path}`] : [];
+
+  // The "last time" sentence is written by code, so a returning session always opens with it.
+  const retestIntro = !retestTopic
+    ? ""
+    : retestNumber === 0
+      ? `Last time you struggled with "${retestTopic}". Let's start there. `
+      : `You also struggled with "${retestTopic}" last time. `;
 
   // Validate the path the model named before it can reach the user.
   const named = draft.file ? normalizePath(draft.file) : null;
@@ -100,17 +126,19 @@ export async function askMainQuestion(
     id: nextQuestionId(state),
     round,
     persona: state.settings.persona,
-    text: draft.text,
+    text: retestIntro + draft.text,
     hookId: hook?.id,
-    filesRead: [...new Set([file?.path, namedIsReal ? named : undefined].filter((p): p is string => Boolean(p)))],
+    filesRead: [...new Set([file?.path, ...agentFiles, namedIsReal ? named : undefined].filter((p): p is string => Boolean(p)))],
     rubric: draft.rubric,
     isFollowUp: false,
     aboutAiCode: hook?.kind === "ai-authored",
+    retestTopic,
   };
 
   return {
     question,
     meta,
+    activity,
     quality: {
       inventedPathDropped: named !== null && !namedIsReal,
       questionNamesRealFile: round === "deep-dive" ? namedIsReal : null,
@@ -207,6 +235,7 @@ export async function evaluateAnswer(
     isFollowUp: true,
     parentId: question.id,
     aboutAiCode: question.aboutAiCode,
+    retestTopic: question.retestTopic,
   };
   return { evaluation, followUp, meta, quality };
 }
@@ -265,7 +294,7 @@ export async function runTurn(input: InterviewState, answer: string | undefined,
   result.nextQuestion = asked.question;
   result.quality.push(asked.quality);
   result.metas.push({ kind: "question", meta: asked.meta });
-  result.toolActivity.push(...asked.question.filesRead.map((path) => `read ${path}`));
+  result.toolActivity.push(...asked.activity);
   return result;
 }
 

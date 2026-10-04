@@ -68,3 +68,29 @@ Verified: `pnpm typecheck`, `pnpm lint`, `pnpm test` (37 unit tests, no model ne
   - **Turn:** Gemma scores the answer 0 to 4 against the rubric and may propose a follow-up, quoting the phrase it is following up on. Code checks the quote is really in the answer, enforces the limit of two follow-ups, and scores a skip as 0 without asking the model.
   - **Report:** code computes the averages and the readiness label; Gemma writes the coaching text from the evaluated transcript.
   - **Safety net:** every model reply is checked with zod; one retry; then a safe fallback. Calls are paced to stay inside the free tier's tokens-per-minute limit.
+
+## 4 Oct 2026: Phase 2 (Mastra interviewer agent, tools, memory)
+
+What was built: the interviewer as a registered Mastra agent with three tools (`src/mastra/agents`, `src/mastra/tools/repo.ts`), per-request repo context, the agent plugged into the turn logic for the code rounds, cross-session memory on Mastra memory + LibSQL (`src/mastra/memory.ts`), retest questions for returning sessions, and progress vs last session in the report.
+
+Verified: `pnpm typecheck`, `pnpm lint`, `pnpm test` (49 unit tests, including the tools, the retest flow and real LibSQL save/recall/forget on a temp database) and `pnpm build` pass.
+
+- `[POST]` **Agent check** (`scripts/spikes/agent-check.ts 3`, hosted 26B): 3 of 3 runs returned a valid question after the agent called `listFiles` and then `readFile` on a file of its own choosing, in 9.2 to 10.4 s. Example: it opened `src/components/ProjectCard.tsx` and asked "Explain the logic behind the `initialsOf` function ... How does it handle different casing styles in a project title?"
+- `[POST]` **Eval with the agent in the loop** (`pnpm eval`, 4 Oct 2026, hosted 26B, both fixtures, 119 model calls, `fixtures/evals/summary.json`), compared with the Phase 1 run without the agent:
+  - Structured output valid: 119 of 119 (Phase 1: 109 of 111). Needed repair: 1 of 119 (Phase 1: 8 of 111). Most of the drop in repairs comes from making `followUp.reason` nullable, not from the agent.
+  - The agent opened at least one file before 18 of 18 code questions (decisions, deep-dive, failure/scale). It never tried an invented path in this run.
+  - Deep-dive questions naming a real file: 6 of 6. Invented paths: 0.
+  - Follow-up quote found in the answer: 51 of 51.
+  - Average score: good 2.95, vague 0.00, wrong 0.00.
+  - Median model time: question 8.6 s (Phase 1: 7.4 s), evaluation 5.4 s (6.7 s), brief 31.9 s, report 14.8 s.
+  - Input tokens: 238,161 (Phase 1: 171,665), about 39% more for the run; the extra tool steps are the main difference, though the run also had 8 more calls. 47 of 119 calls waited for token budget; 0 rate-limit errors.
+- `[POST]` **Agent example on the Python fixture:** the agent read `backend/analysis/subsidy_navigator.py` and asked "walk me through the logic inside the pm_surya_ghar_subsidy function. How exactly does the tiered math work for a system size of 1 kW, 3 kW, and 4 kW?" Nobody gave it that function name; it found it in the file.
+- `[POST]` **Memory check** (`scripts/memory-check.ts 3`, hosted 26B, temp database): 3 of 3 tries. Each try ran a first session with weak answers, saved 5 weak spots, then started a second session from what memory returned. All three second sessions opened with, for example, `Last time you struggled with "System Architecture Knowledge". Let's start there. Explain why you chose to use a build-time script in scripts/render-resume.mjs ...`
+- **Honest notes:** in the eval the agent made exactly one tool call per code question (never two), and `getProvenance` was never called because there is no provenance data until Phase 3. The "good" candidate scored lower than in Phase 1 (2.95 vs 3.44); the questions are different each run and the sample is two interviews, so this is not evidence of anything yet.
+- **How it works (Phase 2, plain language):**
+  - There is one interviewer agent. Each request tells it which repo, persona and role it is dealing with through Mastra's request context.
+  - For questions about code, the agent is not shown the file. It has a `readFile` tool and decides what to open; the tool checks the path against the real file list before reading.
+  - Scoring answers and writing the report do not need tools, so they stay as plain calls. That keeps turns fast and saves tokens.
+  - After the report, plain code saves the weak spots under the repo's name in a small database file on the laptop. Hosted mode skips this entirely.
+  - Next session, the saved weak spots come back, the first one or two questions retest them, and code writes the "Last time you struggled with ..." sentence so it is always there.
+  - The report compares the remembered score with the new one for each retested topic. Topics that are still weak are saved again.

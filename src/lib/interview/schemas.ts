@@ -13,7 +13,8 @@ import { z } from "zod";
 export const PersonaSchema = z.enum(["friendly", "tough"]);
 export type Persona = z.infer<typeof PersonaSchema>;
 
-export const RoundSchema = z.enum(["overview", "decisions", "deep-dive", "failure-scale", "wrap-up"]);
+/** "retest" questions come first in a returning session: they revisit last session's weak spots. */
+export const RoundSchema = z.enum(["retest", "overview", "decisions", "deep-dive", "failure-scale", "wrap-up"]);
 export type Round = z.infer<typeof RoundSchema>;
 
 export const SettingsSchema = z.object({
@@ -108,6 +109,8 @@ export const QuestionSchema = z.object({
   isFollowUp: z.boolean(),
   parentId: z.string().optional(),
   aboutAiCode: z.boolean(),
+  /** Set on a retest question: the weak-spot topic from last session that it revisits. */
+  retestTopic: z.string().optional(),
 });
 export type Question = z.infer<typeof QuestionSchema>;
 

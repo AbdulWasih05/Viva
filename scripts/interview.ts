@@ -5,15 +5,20 @@
  *   pnpm interview https://github.com/owner/repo tough 6
  *   pnpm interview ./my-project friendly              (needs LOCAL_MODE=true)
  *
+ *   pnpm interview portfolio-new --forget             (clear what Viva remembers about this project)
+ *
  * Type your answer and press Enter. "skip" skips a question, "end" finishes early.
+ * In local mode (LOCAL_MODE=true) the weak spots are remembered and retested next time.
  */
 import { writeFileSync } from "node:fs";
 import { createInterface } from "node:readline";
 import { createBrief } from "../src/lib/interview/brief";
-import { buildReport, reportToMarkdown } from "../src/lib/interview/report";
+import { buildReport, reportToMarkdown, weakSpotsToRemember } from "../src/lib/interview/report";
 import { PersonaSchema } from "../src/lib/interview/schemas";
 import { createInterviewState, progress } from "../src/lib/interview/state";
 import { endEarly, runTurn } from "../src/lib/interview/turn";
+import { createAgentDeps } from "../src/mastra/deps";
+import { forgetProject, memoryStatus, recallWeakSpots, saveWeakSpots } from "../src/mastra/memory";
 import { loadSource } from "./load-source";
 
 async function main() {
@@ -27,6 +32,15 @@ async function main() {
 
   console.log(`Reading ${target} ...`);
   const source = await loadSource(target);
+
+  if (personaArg === "--forget") {
+    console.log((await forgetProject(source.id)) ? "Forgotten: Viva no longer remembers anything about this project." : "Nothing was remembered about this project.");
+    return;
+  }
+
+  console.log(memoryStatus().label);
+  const previousWeakSpots = await recallWeakSpots(source.id);
+  if (previousWeakSpots.length > 0) console.log(`Last time's weak spots: ${previousWeakSpots.map((spot) => spot.topic).join("; ")}`);
   const { brief, filesUsed, inventedPathsDropped, meta } = await createBrief(source);
   console.log(`\nRead ${filesUsed.length} of ${source.files.length} files in ${meta.ms} ms${meta.usedFallback ? " (model failed, fallback brief)" : ""}.`);
   console.log(`Invented paths dropped: ${inventedPathsDropped}`);
@@ -51,9 +65,11 @@ async function main() {
     filePaths: source.files.map((file) => file.path),
     brief,
     userCorrection: correction || undefined,
+    previousWeakSpots,
     settings: { persona, mainQuestions },
   });
-  const deps = { readFile: source.readFile };
+  // The Mastra interviewer agent writes the code questions and opens files with its tools.
+  const deps = createAgentDeps(source, state.settings);
 
   let turn = await runTurn(state, undefined, deps);
   while (turn.nextQuestion) {
@@ -79,6 +95,9 @@ async function main() {
   const markdown = reportToMarkdown(report, source.label);
   writeFileSync("viva-report.md", markdown);
   console.log(`\n${markdown}\n\nSaved to viva-report.md`);
+
+  const today = new Date().toISOString().slice(0, 10);
+  if (await saveWeakSpots(source.id, weakSpotsToRemember(report, today))) console.log("Weak spots saved for next time (on this computer only).");
 }
 
 main();
