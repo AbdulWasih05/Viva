@@ -137,3 +137,16 @@ Verified: `pnpm typecheck`, `pnpm lint`, `pnpm test` (63 tests) and `pnpm build`
   - Each answer goes to `/api/turn` together with the whole interview so far. The server scores it, asks the agent or the model for the next question, and sends the updated interview back.
   - `/api/report` computes the scores, has Gemma write the coaching text, and in local mode saves the weak spots.
   - Every route checks its input with zod and turns any failure into a clear JSON error, so the page can show a message and a "Try again" link.
+
+## 4 Oct 2026: Phase 5, code parts only (Render blueprint, rate limit, README)
+
+What was built: `render.yaml`, the per-IP rate limit on `/api/ingest`, `/api/turn` and `/api/report`, and the README.
+
+Verified: `pnpm typecheck`, `pnpm lint`, `pnpm test` (69 tests) and `pnpm build` pass. The blueprint's build command (`pnpm install --frozen-lockfile`, then `pnpm build`) was run locally. Against the production server in hosted mode, ten ingest requests from one IP returned 200 eight times and then 429 with `Retry-After: 600`; a request from a second IP returned 200.
+
+- **Not done, needs Wasih:** the deploy itself (5.2), testing the Deploy button from a clean account (5.4) and walking the live URL (5.5). `render.yaml` has never been run by Render, so the plan name, Node version setting and pnpm build are unverified there.
+- `[POST]` The hosted demo has no database and no private model service: one free web service, one Google AI Studio key. The whole "server" state is a 30-minute cache of public file lists and ten minutes of request counts per IP.
+- **How it works (Phase 5, plain language):**
+  - `render.yaml` tells Render how to build and start the app and which settings to ask for.
+  - Each API route first counts recent requests from the caller's IP address; over the limit, it answers "try again in N minutes" without touching the model.
+  - Sample repos use briefs saved in the repo, so opening one costs no model tokens.

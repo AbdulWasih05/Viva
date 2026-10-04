@@ -125,6 +125,14 @@ Architecture choices and research surprises, newest at the bottom. One line of r
 - **D71. System fonts only.** The scaffold's Google font was removed so the app starts with Wi-Fi off (the offline demo scene) and builds without network access to a font service.
 - **D72. `/api/health`** returns mode, provider and model, for the uptime ping that keeps the free Render instance awake (D7).
 
+## Phase 5 (4 Oct 2026)
+
+- **D73. Blueprint:** `render.yaml` defines one free Node web service. Build `pnpm install --frozen-lockfile && pnpm build`, start `pnpm start`, health check `/api/health`, Node pinned with `NODE_VERSION=22.23.2`, `LOCAL_MODE=false`. `HOSTED_API_KEY` and `GITHUB_TOKEN` are `sync: false`, so Render asks for them and they never live in the repo. Not deployed yet: it needs a Render account and `render.yaml` on `main`.
+- **D74. `autoDeployTrigger: "off"`.** Deploys are started by hand so a push cannot change a demo that judges are using. Render's docs recommend this for Deploy-button blueprints.
+- **D75. Per-IP rate limit, hosted mode only** (`src/lib/server/rate-limit.ts`): per 10 minutes, 8 ingests, 60 turns, 8 reports per IP, read from `x-forwarded-for`. Over the limit returns HTTP 429 with a `Retry-After` header and a readable message. Counts are in memory, so they reset on restart and nothing about a visitor is stored. Reason: all visitors share one model key with a 16,000 tokens-per-minute quota (D31).
+- **D76. The limit is per IP, not global.** It stops one visitor from using the whole quota; it does not make the quota bigger. Several visitors at once are still slowed by the token pacer (D41).
+- **D77. README** now covers both modes, the Deploy button, privacy, why open models, measured numbers and limitations. It states that voice is not built yet.
+
 ### Research notes for later phases (unverified until used)
 
 - **Mastra:** custom OpenAI-compatible endpoint via `model: { id, url, apiKey }` (docs show LM Studio only); fallback `@ai-sdk/openai-compatible`. Structured output via `agent.generate(prompt, { structuredOutput: { schema, jsonPromptInjection, errorStrategy, fallbackValue } })`. Memory via `@mastra/memory` + `@mastra/libsql`. Official Sentry exporter `@mastra/sentry`.
