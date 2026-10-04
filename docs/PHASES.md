@@ -143,10 +143,12 @@ Pure, testable logic that the Mastra agent will call.
 
 ## Phase 5: Render (Sun midday, 2 h)
 
-- [ ] **5.1 `render.yaml` blueprint**: web service (Next.js) ~~+ private service (Ollama with persistent disk, pulls the Gemma model on start); web talks to Ollama over the private network~~ calling the hosted Gemma endpoint (DECISIONS D6: private services and disks are paid only)
+- [x] **5.1 `render.yaml` blueprint**: web service (Next.js) ~~+ private service (Ollama with persistent disk, pulls the Gemma model on start); web talks to Ollama over the private network~~ calling the hosted Gemma endpoint (DECISIONS D6: private services and disks are paid only)
 - [ ] **5.2 Deploy**; measure cold start and per-turn latency `[POST]`; add `/api/health` and a 5-minute uptime ping so the free instance stays awake (DECISIONS D7)
-- [ ] **5.3 Hosted hardening**: `LOCAL_MODE=false`, per-IP rate limit, cached briefs for sample repos
+- [x] **5.3 Hosted hardening**: `LOCAL_MODE=false`, per-IP rate limit, cached briefs for sample repos
 - [ ] **5.4 Deploy to Render button** in README; test it from a clean account or fork if possible
+  - [x] Button and instructions are in the README
+  - [ ] Tested on Render (needs `render.yaml` on `main` and a Render account)
 - [ ] **5.5 Verify** the live URL from a fresh browser: full interview end to end
 
 ---

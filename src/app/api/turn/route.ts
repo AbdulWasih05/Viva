@@ -3,6 +3,7 @@ import { z } from "zod";
 import { InterviewStateSchema } from "@/lib/interview/schemas";
 import { endEarly, runTurn } from "@/lib/interview/turn";
 import { handle, readBody } from "@/lib/server/http";
+import { enforceRateLimit } from "@/lib/server/rate-limit";
 import { resolveRepoId } from "@/lib/server/sources";
 import { createAgentDeps } from "@/mastra/deps";
 
@@ -16,6 +17,7 @@ const Body = z.object({
 
 export async function POST(request: Request) {
   return handle(async () => {
+    enforceRateLimit(request, "turn");
     const { state, answer, action } = await readBody(request, Body);
     if (action === "end") return { state: endEarly(state), done: true, toolActivity: [] };
 

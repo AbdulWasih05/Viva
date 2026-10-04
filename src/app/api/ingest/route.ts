@@ -6,6 +6,7 @@ import { createBrief } from "@/lib/interview/brief";
 import { ProjectBriefSchema } from "@/lib/interview/schemas";
 import { addAiHooks, aiWrittenAreas, loadProvenance } from "@/lib/provenance";
 import { handle, readBody } from "@/lib/server/http";
+import { enforceRateLimit } from "@/lib/server/rate-limit";
 import { resolveTarget } from "@/lib/server/sources";
 import { memoryStatus, recallWeakSpots } from "@/mastra/memory";
 
@@ -17,6 +18,7 @@ const Body = z.object({
 
 export async function POST(request: Request) {
   return handle(async () => {
+    enforceRateLimit(request, "ingest");
     const { target, correction } = await readBody(request, Body);
     const source = await resolveTarget(target);
     const { provenance, checkpointCount, hint } = await loadProvenance(source);
