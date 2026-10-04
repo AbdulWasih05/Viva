@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#F2F0EB" />
+
+    <!-- Resource Hints for Performance -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+
+    <!-- Preload critical assets -->
+    <!-- Note: Image preload removed - only preload above-the-fold images that are actually in the HTML -->
+
+    <!-- Brutalist editorial font stack -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+    <!-- Preload critical above-the-fold font files in parallel with the CSS
+         to eliminate the FOUT swap on the hero ("Build. Break. Ship.", "A.W.")
+         and the projects heading. Note: gstatic URLs are version-pinned by Google
+         and may need updating if the font version bumps. -->
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      crossorigin
+      href="https://fonts.gstatic.com/s/instrumentserif/v5/jizHRFtNs2ka5fXjeivQ4LroWlx-6zAjjH7Motmp5g.woff2"
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      crossorigin
+      href="https://fonts.gstatic.com/s/instrumentserif/v5/jizBRFtNs2ka5fXjeivQ4LroWlx-6zUTjnTLgNs.woff2"
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      crossorigin
+      href="https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwgknk-4.woff2"
+    />
+
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript
+      ><link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap"
+    /></noscript>
+
+    <!-- Preload LCP image — matches Hero <picture> srcset so the browser picks the same variant -->
+    <link
+      rel="preload"
+      as="image"
+      imagesrcset="/wasih-img-400w.webp 400w, /wasih-img-800w.webp 800w, /wasih-img-1200w.webp 1200w"
+      imagesizes="(max-width: 980px) 100vw, 340px"
+      type="image/webp"
+      fetchpriority="high"
+    />
+
+    <title>Abdul Wasih | Portfolio</title>
+    <meta
+      name="description"
+      content="Portfolio of Abdul Wasih. Software Engineer."
+    />
+    <link rel="canonical" href="https://wasih.tech/" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Abdul Wasih | Portfolio" />
+    <meta property="og:description" content="Software Engineer." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://wasih.tech/" />
+    <meta property="og:image" content="https://wasih.tech/og-image.jpg" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Abdul Wasih | Portfolio" />
+    <meta name="twitter:description" content="Software Engineer." />
+    <meta name="twitter:image" content="https://wasih.tech/og-image.jpg" />
+
+    <!-- JSON-LD structured data (Person) — static so it's crawlable without JS
+         and visible in View Source. Single source of truth (not duplicated in SEO.tsx). -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Abdul Wasih",
+        "jobTitle": "Software Engineer",
+        "url": "https://wasih.tech/",
+        "image": "https://wasih.tech/og-image.jpg",
+        "sameAs": [
+          "https://github.com/AbdulWasih05",
+          "https://www.linkedin.com/in/iamwasih"
+        ],
+        "worksFor": {
+          "@type": "Organization",
+          "name": "Freelance Developer"
+        },
+        "knowsAbout": [
+          "React.js",
+          "Next.js",
+          "Node.js",
+          "Express.js",
+          "JavaScript",
+          "TypeScript",
+          "MySQL",
+          "Docker",
+          "Git",
+          "Full Stack Development",
+          "API Integration",
+          "REST APIs",
+          "Responsive Web Design"
+        ]
+      }
+    </script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Microsoft Clarity analytics (deferred to end of body so it doesn't block FCP/LCP) -->
+    <script type="text/javascript">
+      (function (c, l, a, r, i, t, y) {
+        c[a] =
+          c[a] ||
+          function () {
+            (c[a].q = c[a].q || []).push(arguments);
+          };
+        t = l.createElement(r);
+        t.async = 1;
+        t.src = "https://www.clarity.ms/tag/" + i;
+        y = l.getElementsByTagName(r)[0];
+        y.parentNode.insertBefore(t, y);
+      })(window, document, "clarity", "script", "ub71xbza5s");
+    </script>
+  </body>
+</html>

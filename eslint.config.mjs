@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Snapshots of other people's repos used as eval data, not our code.
+    "fixtures/**",
   ]),
 ]);
 

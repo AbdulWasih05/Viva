@@ -27,7 +27,7 @@ Challenge rules that affect the code:
 
 | Category | Prize | What Viva does with it |
 |---|---|---|
-| Gemma (featured) | $200 | The interviewer brain: Gemma 4 31B hosted for the demo, Gemma 4 E4B on Ollama for fully offline use; the two are benchmarked against each other |
+| Gemma (featured) | $200 | The interviewer brain: Gemma 4 26B hosted for the demo, Gemma 4 E4B on Ollama for fully offline use; the two are benchmarked against each other |
 | Render (featured) | $200 | Agent frontend and API as a web service, one-click "Deploy to Render" blueprint |
 | Mastra | $100 | Interviewer agent with tools (readFile, provenance lookup) and cross-session memory of weak spots |
 | Entire | $100 | Viva reads Entire checkpoints to question AI-written code; the post explains Viva's own code via `entire explain` |
@@ -40,7 +40,7 @@ Challenge rules that affect the code:
 2. **Research.** If the task touches an external API, SDK, model, or service, read current docs before writing code. Do not trust memory for package names, model tags, endpoints, CLI output formats, or SDK signatures. Record surprises in `docs/DECISIONS.md`.
 3. **Ideate.** For any non-trivial task, list 2 or 3 options in a line each and pick the simplest that meets the PRD. Prefer boring and explainable over clever.
 4. **Plan.** Write the subtasks (as sub-checkboxes in `PHASES.md` if they are new). Each must be verifiable on its own.
-5. **Build.** One subtask at a time. Small commits with clear messages (Entire links each commit to this session, so commit often).
+5. **Build.** One subtask at a time, on a branch for the phase (for example `phase-1-core-engine`). One commit per phase with a clear message, pushed as a pull request; Wasih reviews and squash-merges. Never push to `main` directly.
 6. **Verify.** Typecheck, lint, tests, and the eval script where relevant. For UI, run the app and walk the flow. Done means verified.
 7. **Log.** Tick the box in `PHASES.md`. Append 2 to 4 lines to `docs/PROGRESS.md` (what changed, how verified, anything for the post). Architecture choices go to `docs/DECISIONS.md` with a one-line reason.
 8. **Loop.** Stop and ask the user when a decision changes scope, costs money, or needs an account or API key.
@@ -58,9 +58,10 @@ Challenge rules that affect the code:
 
 - **Framework:** Next.js (App Router) + TypeScript (strict), pnpm, Tailwind CSS
 - **Agent orchestration:** Mastra (TypeScript). The interviewer is a Mastra agent with tools and memory. Deterministic logic (state machine, scoring math, path validation) stays in plain functions the agent calls.
-- **Model access:** an OpenAI-compatible model provider (via the AI SDK provider Mastra supports; confirm in Phase 0), pointed at:
-  - **Hosted (default for development, evals and the demo):** Gemma 4 31B (`gemma-4-31b-it`) on Google AI Studio; OpenRouter `google/gemma-4-31b-it:free` as fallback
-  - **Local (offline / private option):** Ollama with `gemma4:e4b` (the laptop has 16 GB RAM and an MX130, so it runs mostly on CPU and is too slow for everyday development; see DECISIONS D1, D2)
+- **Model access:** Mastra's built-in model router (see DECISIONS D1, D24 to D27), pointed at:
+  - **Hosted (default for development, evals and the demo):** Gemma 4 26B on Google AI Studio via Google's native API, `model: { id: "google/gemma-4-26b-a4b-it", apiKey }` with `thinkingLevel: "minimal"`; OpenRouter `google/gemma-4-26b-a4b-it:free` (OpenAI-compatible) as documented fallback
+  - **Local (offline / private option):** Ollama's OpenAI-compatible endpoint, `model: { id: "ollama/gemma4:e4b", url }` (the laptop has 16 GB RAM and an MX130, so it runs mostly on CPU: 50 s or more per call)
+  - Structured output uses `jsonPromptInjection: true`; every hosted call has a 30 s timeout and one retry
 - **Validation:** zod for every structured output, one repair retry, then a safe fallback
 - **Memory:** Mastra memory with local file storage (for example LibSQL) in local mode only; hosted mode keeps no memory (privacy)
 - **Repo ingestion:** GitHub REST API (optional `GITHUB_TOKEN`) and local folder reading in local mode
@@ -110,7 +111,7 @@ pnpm typecheck    # next typegen && tsc --noEmit (typegen creates Next's route a
 pnpm lint         # eslint
 pnpm test         # vitest run
 pnpm eval         # tsx scripts/eval.ts: agent evals against fixtures (Phase 1)
-pnpm bench        # tsx scripts/bench-models.ts: local gemma4:e4b vs hosted Gemma 4 31B
+pnpm bench        # model benchmark, reads .env: `pnpm bench hosted 5` or `pnpm bench ollama 3`
 ```
 
 ## Environment variables
@@ -119,9 +120,9 @@ Keep `.env.example` in sync. Never commit real keys.
 
 ```
 LLM_PROVIDER=hosted|ollama # hosted is the default
-HOSTED_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/
-HOSTED_API_KEY=
-HOSTED_MODEL=gemma-4-31b-it
+HOSTED_API_KEY=            # Google AI Studio key
+HOSTED_MODEL=gemma-4-26b-a4b-it
+HOSTED_BASE_URL=           # empty for Google; set only for an OpenAI-compatible fallback (OpenRouter)
 OLLAMA_BASE_URL=http://localhost:11434/v1
 OLLAMA_MODEL=gemma4:e4b
 GITHUB_TOKEN=              # optional
@@ -152,3 +153,13 @@ MEMORY_DB_PATH=.viva/memory.db
 - Sentry shows traced agent turns with quality attributes; screenshots are in `docs/post/`.
 - README covers both modes, the Deploy to Render button, privacy notes, and why open models matter.
 - `docs/post/` has the outline, demo video, narration, screenshots, traces, `entire explain` excerpts, and the friend's feedback.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

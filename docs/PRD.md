@@ -92,7 +92,7 @@ Gemma is the brain: it reads the project, decides what to ask, judges answers, a
 
 - **F7. Two modes, one codebase**
   - **Local:** Ollama + Gemma 4 E4B, folders, memory, offline capable. Slow on a CPU-only laptop, so it is the privacy option, not the default (DECISIONS D1, D2).
-  - **Hosted (Render):** web service calling a hosted Gemma 4 31B endpoint (DECISIONS D6; the private Ollama service on Render was cut because it is paid only). GitHub URLs only, per-IP rate limit, sample repos with cached briefs.
+  - **Hosted (Render):** web service calling hosted Gemma 4 26B on Google AI Studio (DECISIONS D1, D6; the private Ollama service on Render was cut because it is paid only). GitHub URLs only, per-IP rate limit, sample repos with cached briefs.
   - **Deploy to Render** button with `render.yaml` blueprint in the README.
 
 - **F8. Agent tracing (Sentry)**

@@ -1,0 +1,61 @@
+# Secrets
+.env
+.env.local
+*.pem
+*.key
+google-service-account*.json
+
+# Bill samples
+sample_bills/*
+!sample_bills/README.md
+
+# Real consumer bills 
+data/mescom_bills/
+
+# Claude Code local settings
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+
+# Virtual envs
+venv/
+.venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Logs
+*.log
+logs/
+
+node_modules/
+vidyut-dashboard/.next/
+*.tsbuildinfo

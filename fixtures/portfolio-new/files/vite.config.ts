@@ -1,0 +1,101 @@
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react-swc";
+import path from "path";
+import viteCompression from 'vite-plugin-compression';
+
+
+// https://vitejs.dev/config/
+export default defineConfig(({ mode }) => ({
+  server: {
+    host: "::",
+    port: 8080,
+    // my ngrok server
+    allowedHosts: ["defunct-saltish-tanna.ngrok-free.dev"],
+  },
+  plugins: [
+    react(),
+    // Gzip compression
+    viteCompression({
+      verbose: true,
+      disable: false,
+      threshold: 10240, // Only compress files > 10KB
+      algorithm: 'gzip',
+      ext: '.gz',
+    }),
+    // Brotli compression (better compression ratio)
+    viteCompression({
+      verbose: true,
+      disable: false,
+      threshold: 10240,
+      algorithm: 'brotliCompress',
+      ext: '.br',
+    }),
+  ].filter(Boolean),
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  build: {
+    // Target modern browsers for better optimization
+    target: 'es2020',
+    // Enable minification
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: mode === 'production',
+        drop_debugger: mode === 'production',
+        pure_funcs: mode === 'production' ? ['console.log', 'console.info', 'console.debug', 'console.warn'] : []
+      }
+    },
+    // Optimize chunk size
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        // Ensure all files have proper extensions
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name?.endsWith('.css')) {
+            return 'assets/[name]-[hash].css';
+          }
+          return 'assets/[name]-[hash][extname]';
+        },
+        // Manual chunk splitting for better caching and parallel loading
+        manualChunks: (id) => {
+          // Core React and React-dependent libraries that use React APIs
+          // These MUST load together to avoid "createContext undefined" errors
+          if (id.includes('node_modules/react') ||
+              id.includes('node_modules/react-dom') ||
+              id.includes('node_modules/react-router-dom') ||
+              id.includes('node_modules/scheduler') ||
+              id.includes('node_modules/react-helmet-async')) {
+            return 'react-vendor';
+          }
+          // Radix UI and floating-ui (they depend on each other)
+          if (id.includes('node_modules/@radix-ui') || id.includes('node_modules/@floating-ui')) {
+            return 'radix-ui';
+          }
+          // Icons
+          if (id.includes('node_modules/lucide-react')) {
+            return 'icons';
+          }
+          // Other node_modules
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
+        },
+      }
+    },
+    // Source maps only in dev
+    sourcemap: mode === 'development',
+  },
+  // Optimize dependencies
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+    ],
+  },
+}));
