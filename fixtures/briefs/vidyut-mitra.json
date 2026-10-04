@@ -1,0 +1,127 @@
+{
+  "summary": "VidyutMitra is a WhatsApp-first AI energy advisor designed for MESCOM consumers in Karnataka to simplify electricity bill comprehension. It uses a Python backend to extract data from bill photos, performs deterministic financial analyses, and provides responses via text, Kannada voice notes, and infographics.",
+  "stack": [
+    "Python",
+    "Flask",
+    "TypeScript",
+    "Next.js",
+    "Tailwind CSS",
+    "Supabase",
+    "Twilio",
+    "Google Gemini",
+    "Groq",
+    "Sarvam TTS"
+  ],
+  "components": [
+    {
+      "name": "Extraction Pipeline",
+      "purpose": "Uses Gemini vision models to extract structured billing data from images and validate it against a schema.",
+      "files": [
+        "backend/extraction/gemini_client.py",
+        "backend/extraction/pipeline.py",
+        "backend/extraction/schema_validator.py",
+        "backend/extraction/prompts.py"
+      ]
+    },
+    {
+      "name": "Analysis Engine",
+      "purpose": "Runs deterministic mathematical modules for tariff verification, subsidy eligibility, and solar ROI calculations.",
+      "files": [
+        "backend/analysis/orchestrator.py",
+        "backend/analysis/tariff_engine.py",
+        "backend/analysis/subsidy_navigator.py",
+        "backend/analysis/solar_roi.py",
+        "backend/analysis/climate_context.py"
+      ]
+    },
+    {
+      "name": "Output Dispatcher",
+      "purpose": "Composes multi-modal responses including text, Kannada TTS audio, and infographics, then sends them via Twilio.",
+      "files": [
+        "backend/output/ai_composer.py",
+        "backend/output/kannada_tts.py",
+        "backend/output/infographic.py",
+        "backend/output/twilio_dispatcher.py",
+        "backend/output/response_composer.py"
+      ]
+    },
+    {
+      "name": "Web Dashboard",
+      "purpose": "A Next.js application providing a web-based chat interface and an administrative view.",
+      "files": [
+        "vidyut-dashboard/app/chat/page.tsx",
+        "vidyut-dashboard/app/dashboard/page.tsx",
+        "vidyut-dashboard/components/dashboard-shell.tsx"
+      ]
+    }
+  ],
+  "decisions": [
+    "Deliberate omission of bill images from the Supabase database to ensure DPDPA compliance.",
+    "Asynchronous processing of bills using daemon threads to stay within Twilio's 15-second webhook response limit.",
+    "Use of deterministic Python math for financial calculations instead of relying solely on LLM reasoning to prevent hallucinations.",
+    "Fallback to scripted/mock replies in the dashboard when a live backend is not detected."
+  ],
+  "risks": [
+    "Processing time for the extraction and analysis pipeline might exceed the 15-second Twilio timeout if not handled asynchronously.",
+    "Reliance on third-party LLM providers (Gemini/Groq) for critical data extraction and framing.",
+    "Potential for high latency in generating Kannada voice notes using external TTS APIs."
+  ],
+  "hooks": [
+    {
+      "id": "h1",
+      "kind": "decision",
+      "ref": "DPDPA Compliance Strategy",
+      "file": "backend/db/schema.sql",
+      "why": "Why was the decision made to explicitly exclude bill images from the database schema?"
+    },
+    {
+      "id": "h2",
+      "kind": "function",
+      "ref": "process_bill_and_dispatch",
+      "file": "backend/app.py",
+      "why": "How does the daemon thread approach handle errors to ensure the user eventually receives a response?"
+    },
+    {
+      "id": "h3",
+      "kind": "file",
+      "ref": "subsidy_navigator.py",
+      "file": "backend/analysis/subsidy_navigator.py",
+      "why": "How are the various subsidy tiers (PM Surya Ghar vs Gruha Jyothi) modeled and verified?"
+    },
+    {
+      "id": "h4",
+      "kind": "risk",
+      "ref": "LLM Hallucination Mitigation",
+      "file": "backend/output/ai_composer.py",
+      "why": "How is the regex sanity check implemented to ensure LLM output matches the deterministic analysis?"
+    },
+    {
+      "id": "h5",
+      "kind": "function",
+      "ref": "pm_surya_ghar_subsidy",
+      "file": "backend/analysis/subsidy_navigator.py",
+      "why": "Can you walk through the logic for calculating the tiered subsidy amounts?"
+    },
+    {
+      "id": "h6",
+      "kind": "decision",
+      "ref": "Web Chat Mocking",
+      "file": "vidyut-dashboard/app/chat/page.tsx",
+      "why": "Why is the mock-chat logic implemented directly in the frontend component?"
+    },
+    {
+      "id": "h7",
+      "kind": "file",
+      "ref": "schema_validator.py",
+      "file": "backend/extraction/schema_validator.py",
+      "why": "What specific validation rules (R1-R9) are applied to the Gemini extraction output?"
+    },
+    {
+      "id": "h8",
+      "kind": "risk",
+      "ref": "Concurrency and State",
+      "file": "backend/app.py",
+      "why": "How do the in-memory sets _FEEDBACK_WAITING and _ACCOUNT_ID_WAITING scale in a multi-worker production environment?"
+    }
+  ]
+}
