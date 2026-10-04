@@ -1,0 +1,128 @@
+{
+  "summary": "A high-performance personal portfolio website featuring a minimalist monochrome design and an optimized project showcase. It is built with React, TypeScript, and Vite, utilizing Tailwind CSS for styling and Netlify for deployment.",
+  "stack": [
+    "React 18",
+    "TypeScript",
+    "Vite",
+    "Tailwind CSS",
+    "React Router DOM",
+    "Radix UI",
+    "Netlify"
+  ],
+  "components": [
+    {
+      "name": "Navigation & Layout",
+      "purpose": "Handles site-wide navigation, sticky headers, and responsive layout structures.",
+      "files": [
+        "src/components/Header.tsx",
+        "src/components/Footer.tsx",
+        "src/App.tsx"
+      ]
+    },
+    {
+      "name": "Project Showcase",
+      "purpose": "Displays a list of projects and detailed case studies via dynamic routing.",
+      "files": [
+        "src/components/ProjectCard.tsx",
+        "src/components/Projects.tsx",
+        "src/pages/ProjectsPage.tsx",
+        "src/pages/ProjectDetailPage.tsx",
+        "src/data/projects.ts"
+      ]
+    },
+    {
+      "name": "SEO & Metadata",
+      "purpose": "Manages dynamic meta tags, JSON-LD structured data, and search engine visibility.",
+      "files": [
+        "src/components/SEO.tsx",
+        "src/pages/ProjectDetailPage.tsx"
+      ]
+    },
+    {
+      "name": "Resume Preview System",
+      "purpose": "Converts PDF resumes into optimized WebP images at build time for fast loading.",
+      "files": [
+        "scripts/render-resume.mjs",
+        "public/abdul-wasih-resume-preview.webp"
+      ]
+    },
+    {
+      "name": "User Feedback",
+      "purpose": "Provides toast notifications for user interactions.",
+      "files": [
+        "src/components/ui/toast.tsx",
+        "src/components/ui/toaster.tsx",
+        "src/hooks/use-toast.ts"
+      ]
+    }
+  ],
+  "decisions": [
+    "Used createBrowserRouter and RouterProvider for compatibility with React Router v7 upgrades.",
+    "Implemented a build-time script to render PDF pages to WebP to optimize asset delivery and performance.",
+    "Utilized lazy loading and Suspense for route-based code splitting.",
+    "Applied custom security headers via netlify.toml including X-Frame-Options and X-XSS-Protection."
+  ],
+  "risks": [
+    "Client-side routing may cause issues with direct URL access if the Netlify redirect rule (/* to /index.html) is misconfigured.",
+    "The use of 'any' in the RouterProvider future prop bypasses TypeScript safety.",
+    "Large project data in src/data/projects.ts increases bundle size as the portfolio grows."
+  ],
+  "hooks": [
+    {
+      "id": "h1",
+      "kind": "file",
+      "ref": "scripts/render-resume.mjs",
+      "file": "scripts/render-resume.mjs",
+      "why": "Why was a build-time script chosen over a client-side PDF renderer for the resume preview?"
+    },
+    {
+      "id": "h2",
+      "kind": "function",
+      "ref": "slugify",
+      "file": "src/data/projects.ts",
+      "why": "How does the slugify function ensure URL consistency across different components?"
+    },
+    {
+      "id": "h3",
+      "kind": "decision",
+      "ref": "React Router v7 upgrade path",
+      "file": "src/App.tsx",
+      "why": "Why did you choose createBrowserRouter over the traditional component-based approach?"
+    },
+    {
+      "id": "h4",
+      "kind": "file",
+      "ref": "src/components/SEO.tsx",
+      "file": "src/components/SEO.tsx",
+      "why": "How is the SEO component structured to handle different social sharing requirements?"
+    },
+    {
+      "id": "h5",
+      "kind": "risk",
+      "ref": "Type safety in RouterProvider",
+      "file": "src/App.tsx",
+      "why": "What is the implication of using 'as any' for the v7_startTransition prop?"
+    },
+    {
+      "id": "h6",
+      "kind": "file",
+      "ref": "netlify.toml",
+      "file": "netlify.toml",
+      "why": "Can you explain the rationale behind the specific security headers configured here?"
+    },
+    {
+      "id": "h7",
+      "kind": "function",
+      "ref": "scrollToSection",
+      "file": "src/components/Header.tsx",
+      "why": "How do you handle the offset calculation to ensure smooth scrolling doesn't land under the sticky header?"
+    },
+    {
+      "id": "h8",
+      "kind": "decision",
+      "ref": "Monochrome aesthetic",
+      "file": "src/index.css",
+      "why": "How was the design system implemented to maintain the minimalist monochrome look across components?"
+    }
+  ]
+}

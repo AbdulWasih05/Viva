@@ -39,3 +39,32 @@ All numbers below were measured on 4 Oct 2026 from this laptop with the scripts 
   - Memory is a small SQLite-style file (`.viva/memory.db`) written by plain code through Mastra's memory API; it survives restarts.
   - Entire saves each coding session as a git ref next to the commit it produced. Viva will read those refs to learn which files the agent wrote and what it was asked to do.
 - **Git:** `main` was rewritten once to drop attribution trailers and the one public checkpoint ref with an email address was deleted (DECISIONS D15a). Work now goes through one PR per phase.
+
+## 4 Oct 2026: Phase 1 (core engine)
+
+What was built: provider setup and the structured-output helper (`src/lib/llm`), GitHub / local / fixture readers and file selection (`src/lib/ingest`), brief, state machine, turn logic and report (`src/lib/interview`), a terminal interview (`pnpm interview`) and the eval script (`pnpm eval`).
+
+Verified: `pnpm typecheck`, `pnpm lint`, `pnpm test` (37 unit tests, no model needed) pass. The GitHub reader was run against `AbdulWasih05/Portfolio-new` (70 files listed, README read, an invented path refused) and the local reader against two folders (refused when `LOCAL_MODE` is off, never lists `.env` or `node_modules`). One terminal interview was run end to end with piped answers and wrote `viva-report.md`.
+
+- `[POST]` **Eval results** (`pnpm eval`, 4 Oct 2026, hosted `gemma-4-26b-a4b-it`, both fixtures, 3 scripted candidates each, 5 main questions, 111 model calls, saved in `fixtures/evals/summary.json`):
+  - Structured output valid after at most one repair: 109 of 111 (98%); 8 of 111 (7%) needed the repair attempt. Target was 95%.
+  - Deep-dive questions naming a real file: 6 of 6.
+  - Invented file paths: 0 in the two briefs, 0 in questions (so nothing had to be dropped in this run).
+  - Follow-ups whose quoted phrase was found in the candidate's answer (automatic check): 42 of 43 (98%).
+  - Average score per scripted candidate: good 3.44, vague 0.00, wrong 0.00 (out of 4). The good candidate is Gemma playing the student with the relevant file in front of it; vague and wrong are canned sentences.
+  - Median model time, excluding waits for token budget: brief 29.4 s, question 7.4 s, evaluation 6.7 s, report 15.0 s. 24 of 111 calls waited for budget; 0 hit a rate-limit error.
+  - 171,665 input tokens for the whole run.
+- `[POST]` **Manual follow-up check (Claude's read, not yet Wasih's):** 10 samples from `fixtures/evals/followup-samples.json` (6 from the good candidate, 3 vague, 1 wrong): all 10 follow-ups pick up something the candidate actually said. Example: answer "It basically just works, I used it because everyone uses it and it is the best option." got "You said you used your stack because it is 'the best option'; what specific technical requirements or constraints led you to that conclusion?"
+- `[POST]` `[WHY]` **The first eval ran on a fake brief and looked fine.** The brief prompt (40,000 characters) timed out, the retry hit the quota, and the helper returned the safe fallback brief, exactly as designed. The interviews still ran, so the summary looked healthy. Only the line `fallback=true` gave it away. Fix: smaller budget (24,000 characters), longer limit for the brief, and the eval prints the fallback flag per brief.
+- `[POST]` `[WHY]` **16,000 input tokens per minute.** The 429 error body named the quota. On the hosted demo every visitor shares it. Token pacing (DECISIONS D41) turned 429s and hangs into short waits.
+- `[POST]` `[WHY]` **A hang instead of an error.** With the quota exhausted, one raw request to Google got no reply for 170 s. Same symptom as the Phase 0 "5-minute hang", so that one was probably the quota too, not the JSON-schema mode. (Not proven; the schema-in-prompt choice stays because it has worked in every run since.)
+- `[POST]` **Local benchmark, finally** (`pnpm bench ollama 3`, `gemma4:e4b`, same 3,481-character brief prompt as hosted): 0 of 3 runs finished inside the 15-minute limit, while hosted took a median of 6.8 s for the same prompt. Caveat: other work (typecheck, tests, the hosted eval) was using the CPU during these runs, so local alone would be somewhat faster. The question prompt was not measured locally.
+- **Follow-up limit works as designed but is expensive for weak answers:** vague and wrong candidates got 2 follow-ups on every main question (15 questions for 5 mains).
+- **Known gap:** a turn that moves on to a new main question makes two model calls and takes about 14 s, over the PRD's 8 s target (DECISIONS D42).
+- **How it works (Phase 1, plain language):**
+  - **Ingest:** list every file in the repo, drop junk (lockfiles, images, build output), score the rest (README first, then manifests, configs, entry points, bigger source files) and take the best ones until a size budget is full.
+  - **Brief:** Gemma reads those files and fills in a form (summary, stack, components, decisions, risks, hooks). Code then checks every file path in the form against the real file list and removes any it made up.
+  - **Interview:** code decides the plan (overview, decisions, deep dive, failure and scale, wrap-up) and which hook each question uses. Gemma writes the question and a rubric for it.
+  - **Turn:** Gemma scores the answer 0 to 4 against the rubric and may propose a follow-up, quoting the phrase it is following up on. Code checks the quote is really in the answer, enforces the limit of two follow-ups, and scores a skip as 0 without asking the model.
+  - **Report:** code computes the averages and the readiness label; Gemma writes the coaching text from the evaluated transcript.
+  - **Safety net:** every model reply is checked with zod; one retry; then a safe fallback. Calls are paced to stay inside the free tier's tokens-per-minute limit.

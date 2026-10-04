@@ -110,7 +110,8 @@ pnpm start        # serve the production build
 pnpm typecheck    # next typegen && tsc --noEmit (typegen creates Next's route and layout types first)
 pnpm lint         # eslint
 pnpm test         # vitest run
-pnpm eval         # tsx scripts/eval.ts: agent evals against fixtures (Phase 1)
+pnpm eval         # scripted interviews against the fixtures, prints quality metrics: `pnpm eval` or `pnpm eval portfolio-new`
+pnpm interview    # terminal interview: `pnpm interview <fixture | github url | folder> [friendly|tough] [5-12]`
 pnpm bench        # model benchmark, reads .env: `pnpm bench hosted 5` or `pnpm bench ollama 3`
 ```
 

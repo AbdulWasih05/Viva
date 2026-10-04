@@ -75,7 +75,7 @@ All times IST. Deadline: **Mon 5 Oct, 12:29 PM**. Internal publish target: **Mon
   - [x] `scripts/bench-models.ts`: same brief + question prompts, ~~10 runs each on local ~4B and hosted larger Gemma~~ 3 runs on local `gemma4:e4b` and 5 on hosted Gemma 4 26B (DECISIONS D8: CPU runs are slow; the rest moves to Phase 1 evals)
   - [ ] Record: structured output validity, median latency, question specificity (names a real file?). Tag `[POST]`
     - [x] Hosted 26B, 5 runs: recorded in PROGRESS
-    - [ ] Local `gemma4:e4b`, 3 runs: first attempt was ruined by the laptop going to sleep mid-run; rerun in progress
+    - [x] Local `gemma4:e4b`, 3 runs of the brief prompt: 0 of 3 finished inside the 15-minute limit (recorded in PROGRESS, Phase 1 section). The question prompt was not measured.
   - [x] Set `OLLAMA_MODEL` and `HOSTED_MODEL` (`gemma4:e4b`, `gemma-4-26b-a4b-it`)
 - [ ] **0.8 Fixtures**
   - [x] ~~3 public repos of different shapes (Node API, React app, Python app; include one of Wasih's if public)~~ 2 public repos of different shapes: `vidyut-mitra` (Python + Next.js) and `Portfolio-new` (Vite + React), both Wasih's (DECISIONS D9, D30)
@@ -88,12 +88,14 @@ All times IST. Deadline: **Mon 5 Oct, 12:29 PM**. Internal publish target: **Mon
 
 Pure, testable logic that the Mastra agent will call.
 
-- [ ] **1.1 Model provider setup**: one module creating the model for `ollama` or `hosted`; zod structured-output helper with one repair retry and typed fallback; latency and token metadata returned
-- [ ] **1.2 Ingestion**: GitHub reader, local folder reader (`LOCAL_MODE` only), file selection heuristic, ignore list, token budget; tests on fixtures
-- [ ] **1.3 Project brief**: prompt + schema; validate every path against the file list, drop and count invented ones `[WHY]`; verify on all fixtures, save to `fixtures/briefs/`
-- [ ] **1.4 Interview logic**: state machine (rounds, counts, end conditions), rubric-driven question prompt, evaluation prompt with follow-up rule (must reference the answer), skip handling, persona instructions; unit tests on state transitions
-- [ ] **1.5 Report**: scores and averages computed in code; Gemma writes strengths, weak spots, revision list, likely next questions; Markdown export
-- [ ] **1.6 CLI + evals**: `scripts/interview.ts` (terminal interview); `scripts/eval.ts` with scripted good, vague, and wrong answers; metrics: validity, real-file rate, follow-up grounding (manual 10-sample check, iterate prompts to 8 of 10). Log `[POST]`
+- [x] **1.1 Model provider setup**: one module creating the model for `ollama` or `hosted`; zod structured-output helper with one repair retry and typed fallback; latency and token metadata returned
+  - [x] Added while building: token pacing for the hosted free tier (`src/lib/llm/pacing.ts`) and waiting out a rate-limit error (DECISIONS D31 to D33, D41)
+- [x] **1.2 Ingestion**: GitHub reader, local folder reader (`LOCAL_MODE` only), file selection heuristic, ignore list, token budget; tests on fixtures
+- [x] **1.3 Project brief**: prompt + schema; validate every path against the file list, drop and count invented ones `[WHY]`; verify on all fixtures, save to `fixtures/briefs/`
+- [x] **1.4 Interview logic**: state machine (rounds, counts, end conditions), rubric-driven question prompt, evaluation prompt with follow-up rule (must reference the answer), skip handling, persona instructions; unit tests on state transitions
+- [x] **1.5 Report**: scores and averages computed in code; Gemma writes strengths, weak spots, revision list, likely next questions; Markdown export
+- [x] **1.6 CLI + evals**: `scripts/interview.ts` (terminal interview); `scripts/eval.ts` with scripted good, vague, and wrong answers; metrics: validity, real-file rate, follow-up grounding (manual 10-sample check, iterate prompts to 8 of 10). Log `[POST]`
+  - [ ] Wasih reads 10 follow-ups in `fixtures/evals/followup-samples.json` himself (Claude's own read was 10 of 10, but the manual check should be his)
 
 ---
 
