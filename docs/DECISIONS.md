@@ -112,6 +112,19 @@ Architecture choices and research surprises, newest at the bottom. One line of r
 - **D61. The dogfood fixture stores extracted data, not transcripts.** `fixtures/viva/checkpoints.json` holds checkpoint metadata, linked commits with their files, and the human prompts, as produced by the local reader. Regenerate with `pnpm tsx scripts/snapshot-viva.ts`.
 - **D62. Commit from PowerShell, not Git Bash.** A commit made through Git Bash got no `Entire-Checkpoint` trailer; the hook exits quietly when it cannot find the `entire` binary, which is the probable cause. The commit was redone from PowerShell and got its trailer.
 
+## Phase 4 (4 Oct 2026)
+
+- **D63. The browser holds the interview; the server holds nothing.** The whole `InterviewState` is sent with every `/api/turn` request and comes back updated. Routes validate it with the zod schema first.
+- **D64. Repo lookups are cached in memory for 30 minutes** (`src/lib/server/sources.ts`), keyed by repo id. Reason: each stateless turn needs the repo again so the agent can open files, and asking GitHub for the file list every turn would use up its rate limit. The cache holds file lists of public repos only, no user data.
+- **D65. Sample repos use the briefs saved by the eval run** (`fixtures/briefs/*.json`). A visitor sees a sample brief in well under a second and it costs no model tokens, which matters under the shared 16,000 tokens-per-minute quota. A correction always goes to the model.
+- **D66. Errors have two kinds.** A `UserError` is the user's to fix: HTTP 400 and the message is shown as written ("Repository not found, or it is private."). Anything else is HTTP 500 with a generic message; details go to the server log only.
+- **D67. Server logs carry metadata only:** per model call the time, the wait for token budget and the token counts; per failure the first line of the error. No prompt or answer text.
+- **D68. The agent gets two tool calls per question and one attempt.** `[WHY]` On large files Gemma re-read the same file up to four times, sometimes emitted a malformed tool call (`MALFORMED_FUNCTION_CALL`), and ended without a question. The retry then repeated the tool calls and used about 8,000 of the 16,000 tokens per minute, so the next turn waited 35 to 40 s. Now the tools refuse a third call, and if the agent's single attempt fails the question is written by a plain call with the file pasted in (plan B). Measured after the change: turns of 6 to 13 s on the same sample, and plan B produced a proper question when the agent failed.
+- **D69. The token pacer records real usage.** After each call the estimate is replaced by the input-token count the provider reported. Reason: agent calls resend the prompt on every tool step, so the estimate was too low and the quota was exceeded without the pacer noticing.
+- **D70. No streaming yet.** The UI shows the candidate's answer immediately and a waiting line; what the agent did ("reading src/mastra/index.ts") appears under the question once the turn returns, not live. Live tool status needs a streaming route; left for later if time allows.
+- **D71. System fonts only.** The scaffold's Google font was removed so the app starts with Wi-Fi off (the offline demo scene) and builds without network access to a font service.
+- **D72. `/api/health`** returns mode, provider and model, for the uptime ping that keeps the free Render instance awake (D7).
+
 ### Research notes for later phases (unverified until used)
 
 - **Mastra:** custom OpenAI-compatible endpoint via `model: { id, url, apiKey }` (docs show LM Studio only); fallback `@ai-sdk/openai-compatible`. Structured output via `agent.generate(prompt, { structuredOutput: { schema, jsonPromptInjection, errorStrategy, fallbackValue } })`. Memory via `@mastra/memory` + `@mastra/libsql`. Official Sentry exporter `@mastra/sentry`.

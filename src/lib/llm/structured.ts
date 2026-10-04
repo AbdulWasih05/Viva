@@ -35,7 +35,7 @@ export type GenerateFn = (args: GenerateArgs) => Promise<GenerateResult>;
 /** Real model call through a Mastra agent. */
 export const mastraGenerate: GenerateFn = async ({ instructions, prompt, schema, timeoutMs }) => {
   // Stay under the hosted free tier's tokens-per-minute quota (see pacing.ts). Local models have no quota.
-  const pacedMs = getProvider() === "hosted" ? await paceHostedCall(instructions.length + prompt.length) : 0;
+  const pace = getProvider() === "hosted" ? await paceHostedCall(instructions.length + prompt.length) : undefined;
   const agent = new Agent({ id: "viva-structured", name: "Viva", instructions, model: getModelConfig() });
   const res = await agent.generate(prompt, {
     providerOptions,
@@ -45,7 +45,8 @@ export const mastraGenerate: GenerateFn = async ({ instructions, prompt, schema,
     abortSignal: AbortSignal.timeout(timeoutMs ?? getCallTimeoutMs()),
   });
   const usage = res.usage as { inputTokens?: number; outputTokens?: number } | undefined;
-  return { object: res.object, inputTokens: usage?.inputTokens, outputTokens: usage?.outputTokens, pacedMs };
+  pace?.settle(usage?.inputTokens);
+  return { object: res.object, inputTokens: usage?.inputTokens, outputTokens: usage?.outputTokens, pacedMs: pace?.waitedMs ?? 0 };
 };
 
 /**
@@ -73,6 +74,8 @@ export async function generateStructured<T>(options: {
   timeoutMs?: number;
   /** Tests set this to 0 so a simulated rate limit does not really wait. */
   maxRateLimitWaitMs?: number;
+  /** 2 by default (one repair retry). The agent path uses 1 because it has its own, cheaper plan B. */
+  maxAttempts?: 1 | 2;
 }): Promise<{ value: T; meta: StructuredMeta }> {
   const { instructions, prompt, schema, fallback, timeoutMs } = options;
   const generate = options.generate ?? mastraGenerate;
@@ -90,7 +93,7 @@ export async function generateStructured<T>(options: {
   let lastError = "";
   // Set only when the model replied but the reply did not match the schema.
   let replyProblem = "";
-  for (const attempt of [1, 2]) {
+  for (const attempt of options.maxAttempts === 1 ? [1] : [1, 2]) {
     // On the second attempt, tell the model what was wrong with its first reply (if it gave one).
     const attemptPrompt = replyProblem
       ? `${prompt}\n\nYour previous reply could not be used: ${replyProblem}\nReply again with only valid JSON that matches the schema.`
@@ -104,6 +107,8 @@ export async function generateStructured<T>(options: {
       if (parsed.success) {
         meta.repaired = attempt === 2;
         meta.ms = Date.now() - start;
+        // Metadata only (no prompt or answer text), so slow calls can be found in the server log.
+        console.info(`[viva] model call ok: ${meta.ms} ms (waited ${meta.pacedMs} ms for budget), ${meta.inputTokens ?? "?"} in / ${meta.outputTokens ?? "?"} out tokens, attempt ${attempt}`);
         return { value: parsed.data, meta };
       }
       replyProblem = parsed.error.issues
@@ -111,8 +116,12 @@ export async function generateStructured<T>(options: {
         .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
         .join("; ");
       lastError = replyProblem;
+      console.warn(`[viva] model reply did not match the schema (attempt ${attempt}, ${Date.now() - start} ms): ${replyProblem.slice(0, 160)}`);
     } catch (err) {
       lastError = err instanceof Error ? err.message.slice(0, 400) : String(err);
+      // Logged so a failing model call is visible on the server. Only the error's first line is
+      // printed: provider errors carry no prompt or answer text there.
+      console.warn(`[viva] model call failed (attempt ${attempt}, ${Date.now() - start} ms): ${lastError.split("\n")[0].slice(0, 160)}`);
       // Rate limited: wait for the quota window the provider named, then use the second attempt.
       const wait = rateLimitWaitMs(lastError);
       if (wait !== null && attempt === 1) {
