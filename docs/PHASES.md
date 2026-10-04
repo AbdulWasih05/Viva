@@ -43,42 +43,44 @@ All times IST. Deadline: **Mon 5 Oct, 12:29 PM**. Internal publish target: **Mon
   - [x] Create `.env.example`, `docs/PROGRESS.md`, `docs/DECISIONS.md`, `docs/post/`; fill the Commands section of CLAUDE.md
   - [ ] Verify `pnpm dev`, `pnpm typecheck`, `pnpm test`
     - [x] `pnpm typecheck`, `pnpm lint`, `pnpm build` pass
-    - [ ] `pnpm test` (blocked: Vitest's native binding is skipped on Node 22.11; needs Node >= 22.13)
-    - [ ] `pnpm dev` page loads
+    - [x] `pnpm test` passes on Node 22.23.2 (it could not start on 22.11: Vitest's native binding needs Node >= 22.12)
+    - [x] `pnpm dev` page loads (HTTP 200 on localhost:3000)
 - [ ] **0.2 Session capture (before any real coding)**
   - [ ] Install the Entire CLI (docs.entire.io/quickstart), run its Claude Code setup in the repo (`entire enable`), choose "always" to link commits to sessions. Verify with `entire checkpoint list` after a commit
     - [x] `entire enable --agent claude-code` done, hooks in `.claude/settings.json`
-    - [ ] Checkpoint appears after a commit (needs a fresh Claude Code session so the hooks load)
+    - [x] Checkpoint appears after a commit (`entire checkpoint list` shows it; the commit has an `Entire-Checkpoint` trailer)
   - [ ] Install DevRelay (devrelay.com, MCP server + skills) for saving a session to DEV later
   - [x] Confirm the privacy rule: public repo means public checkpoints; no secrets in sessions (DECISIONS D17)
   - [ ] Timebox 20 minutes; log blockers in DECISIONS.md
 - [x] **0.3 Research: Gemma**
   - [x] Current Gemma family and Ollama tags; pick the ~4B model that fits 16 GB RAM (do not test 12B locally): `gemma4:e4b` (D2, D3)
-  - [x] Hosted Gemma option (OpenAI-compatible, free tier or credits) that offers a larger Gemma (12B or 27B): candidates Google AI Studio / Gemini API, OpenRouter, others. Record limits: AI Studio `gemma-4-31b-it`, OpenRouter fallback (D1)
+  - [x] Hosted Gemma option (OpenAI-compatible, free tier or credits) that offers a larger Gemma (12B or 27B): candidates Google AI Studio / Gemini API, OpenRouter, others. Record limits: AI Studio `gemma-4-26b-a4b-it` (31B was too unreliable), OpenRouter fallback; AI Studio limits are unpublished (D1)
   - [x] Does the chosen Gemma accept images? (decides Phase 8): yes per the model docs, not yet tried by us
-- [ ] **0.4 Spike: Mastra (45 min, decides architecture)**
-  - [ ] Minimal Mastra agent calling Ollama Gemma through an OpenAI-compatible provider
-  - [ ] One tool call works (`readFile` stub) with the ~4B model
-  - [ ] Structured output with a zod schema works, or a repair path is needed
-  - [ ] Memory with local storage persists across two runs
-  - [ ] Log results; if tool calling is unreliable on ~4B, decide: tools called by deterministic code between agent steps, or hosted larger Gemma as the agent's default
-- [ ] **0.5 Spike: Entire checkpoint format (30 min)**
-  - [ ] After a few commits in this repo, inspect the checkpoint data (`git for-each-ref refs/entire/checkpoints/`, the stored files, `entire checkpoint explain`)
-  - [ ] Document the format in DECISIONS.md: where the prompt, transcript, changed files, and any attribution data live
-  - [ ] Check whether the GitHub API can read these refs on a public repo (`git/matching-refs`, trees, blobs)
+- [x] **0.4 Spike: Mastra (45 min, decides architecture)**
+  - [x] Minimal Mastra agent calling Ollama Gemma through an OpenAI-compatible provider (and hosted Gemma through `google/<model>`), D1, D27
+  - [x] One tool call works (`readFile` stub) with the ~4B model: 1 of 1 local, 5 of 5 hosted (D24)
+  - [x] Structured output with a zod schema works, or a repair path is needed: works with the schema in the prompt; native JSON-schema mode hangs sometimes (D25, D26)
+  - [x] Memory with local storage persists across two runs: tested through a Next.js route in dev and in a production build (D28)
+  - [x] Log results; if tool calling is unreliable on ~4B, decide: tools called by deterministic code between agent steps, or hosted larger Gemma as the agent's default: tool calling was reliable, hosted is the default for speed
+- [x] **0.5 Spike: Entire checkpoint format (30 min)**
+  - [x] After a few commits in this repo, inspect the checkpoint data (`git for-each-ref refs/entire/checkpoints/`, the stored files, `entire checkpoint explain`)
+  - [x] Document the format in DECISIONS.md: where the prompt, transcript, changed files, and any attribution data live (D18 to D21)
+  - [x] Check whether the GitHub API can read these refs on a public repo (`git/matching-refs`, trees, blobs) (D22)
 - [ ] **0.6 Research: other partners (read only)**
   - [ ] Render: private services, persistent disk, instance RAM needed for ~4B Gemma on Ollama, Blueprint syntax, Deploy to Render button; claim credits at hacktoberfest.com/my/promos
   - [ ] ElevenLabs: TTS endpoint, voice IDs for two personas, speech-to-text with word timestamps; claim credits
   - [x] Sentry: Next.js setup, AI SDK / Mastra integration for automatic LLM spans, custom span attributes, dashboards
   - Render and ElevenLabs docs are read (notes in DECISIONS.md); still open: Wasih claims credits, and voice IDs get picked from `GET /v2/voices` once there is a key
 - [ ] **0.7 Model benchmark (post material)**
-  - [ ] `scripts/bench-models.ts`: same brief + question prompts, ~~10 runs each on local ~4B and hosted larger Gemma~~ 3 runs on local `gemma4:e4b` and 5 on hosted Gemma 4 31B (DECISIONS D8: CPU runs are slow; the rest moves to Phase 1 evals)
+  - [x] `scripts/bench-models.ts`: same brief + question prompts, ~~10 runs each on local ~4B and hosted larger Gemma~~ 3 runs on local `gemma4:e4b` and 5 on hosted Gemma 4 26B (DECISIONS D8: CPU runs are slow; the rest moves to Phase 1 evals)
   - [ ] Record: structured output validity, median latency, question specificity (names a real file?). Tag `[POST]`
-  - [ ] Set `OLLAMA_MODEL` and `HOSTED_MODEL`
+    - [x] Hosted 26B, 5 runs: recorded in PROGRESS
+    - [ ] Local `gemma4:e4b`, 3 runs: first attempt was ruined by the laptop going to sleep mid-run; rerun in progress
+  - [x] Set `OLLAMA_MODEL` and `HOSTED_MODEL` (`gemma4:e4b`, `gemma-4-26b-a4b-it`)
 - [ ] **0.8 Fixtures**
-  - [ ] ~~3 public repos of different shapes (Node API, React app, Python app; include one of Wasih's if public)~~ 2 public repos of different shapes, one of Wasih's if public (DECISIONS D9)
-  - [ ] Snapshot selected files into `fixtures/`
-  - [ ] Plan the third fixture: this repo itself (it will have Entire checkpoints by Phase 3)
+  - [x] ~~3 public repos of different shapes (Node API, React app, Python app; include one of Wasih's if public)~~ 2 public repos of different shapes: `vidyut-mitra` (Python + Next.js) and `Portfolio-new` (Vite + React), both Wasih's (DECISIONS D9, D30)
+  - [x] Snapshot selected files into `fixtures/`
+  - [x] Plan the third fixture: this repo itself (it will have Entire checkpoints by Phase 3)
 
 ---
 
