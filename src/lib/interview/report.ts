@@ -5,7 +5,7 @@
 import { generateStructured, type GenerateFn, type StructuredMeta } from "../llm/structured";
 import { LONG_CALL_TIMEOUT_MS } from "./brief";
 import { REPORT_INSTRUCTIONS, reportPrompt } from "./prompts";
-import { ReportDraftSchema, type InterviewState, type Report, type ReportDraft, type Round } from "./schemas";
+import { ReportDraftSchema, type InterviewState, type Report, type ReportDraft, type Round, type WeakSpot } from "./schemas";
 import { mainQuestionOf } from "./state";
 
 /** Average of the evaluated answers, rounded to one decimal. 0 when nothing was evaluated. */
@@ -65,6 +65,44 @@ export function computeStats(state: InterviewState): {
   return { overall, readiness: readinessLabel(overall, counted.length), byRound, perQuestion };
 }
 
+/**
+ * Progress on the topics retested from last session.
+ * "before" is the score remembered from last time; "after" is the average of this session's
+ * retest question and its follow-ups on that topic.
+ */
+export function progressVsLast(state: InterviewState): Report["progressVsLast"] {
+  const progress: Report["progressVsLast"] = [];
+  for (const retest of state.questions.filter((q) => q.round === "retest" && !q.isFollowUp && q.retestTopic)) {
+    const scores = state.evaluations
+      .filter((evaluation) => {
+        const question = state.questions.find((q) => q.id === evaluation.questionId);
+        return evaluation.evaluated && question !== undefined && mainQuestionOf(state, question).id === retest.id;
+      })
+      .map((evaluation) => evaluation.score);
+    const before = state.previousWeakSpots.find((spot) => spot.topic === retest.retestTopic);
+    if (scores.length === 0 || !before) continue;
+    progress.push({ topic: before.topic, before: before.lastScore, after: averageScore(scores) });
+  }
+  return progress;
+}
+
+/** A retested topic counts as fixed once the candidate scores at least this on it. */
+const FIXED_SCORE = 3;
+const MAX_REMEMBERED = 5;
+
+/**
+ * What to remember for next time: retested topics that are still weak come first (so they are
+ * retested again), then this session's new weak spots. No duplicates, at most five.
+ */
+export function weakSpotsToRemember(report: Report, sessionDate: string): WeakSpot[] {
+  const stillWeak: WeakSpot[] = report.progressVsLast
+    .filter((item) => item.after < FIXED_SCORE)
+    .map((item) => ({ topic: item.topic, evidence: "Still weak when retested.", lastScore: item.after, sessionDate }));
+  const retested = new Set(report.progressVsLast.map((item) => item.topic.toLowerCase()));
+  const fresh = report.weakSpots.filter((spot) => !retested.has(spot.topic.toLowerCase()));
+  return [...stillWeak, ...fresh].slice(0, MAX_REMEMBERED);
+}
+
 /** Used when the model fails twice: coaching text assembled from the evaluations themselves. */
 export function fallbackReportDraft(state: InterviewState): ReportDraft {
   const weakest = state.evaluations
@@ -108,7 +146,7 @@ export async function buildReport(
     revisionList: draft.revisionList,
     likelyNextQuestions: draft.likelyNextQuestions.slice(0, 5),
     deliverySummary: null, // Phase 6
-    progressVsLast: [], // Phase 2
+    progressVsLast: progressVsLast(state),
   };
   return { report, meta };
 }
@@ -140,6 +178,9 @@ export function reportToMarkdown(report: Report, repoLabel: string): string {
     `## Revise before the real interview\n${bullets(report.revisionList)}`,
     `## Likely next questions\n${bullets(report.likelyNextQuestions)}`,
     report.deliverySummary ? `## How you said it\n${report.deliverySummary}` : "",
+    report.progressVsLast.length > 0
+      ? `## Progress since last session\n${bullets(report.progressVsLast.map((p) => `**${p.topic}:** ${p.before}/4 last time, ${p.after}/4 now`))}`
+      : "",
     `## Question by question\n\n${questions}`,
   ]
     .filter(Boolean)

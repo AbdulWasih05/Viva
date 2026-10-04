@@ -1,18 +1,18 @@
 {
-  "summary": "A high-performance personal portfolio website featuring a minimalist monochrome design and an optimized project showcase. It is built with React, TypeScript, and Vite, utilizing Tailwind CSS for styling and Netlify for deployment.",
+  "summary": "A high-performance personal portfolio website featuring a minimalist monochrome design and optimized project showcases. It is built using React, TypeScript, and Vite, with a focus on SEO, accessibility, and rapid asset delivery.",
   "stack": [
     "React 18",
     "TypeScript",
     "Vite",
     "Tailwind CSS",
-    "React Router DOM",
+    "React Router Dom",
     "Radix UI",
     "Netlify"
   ],
   "components": [
     {
-      "name": "Navigation & Layout",
-      "purpose": "Handles site-wide navigation, sticky headers, and responsive layout structures.",
+      "name": "Navigation and Layout",
+      "purpose": "Provides the global header, footer, and routing structure for the application.",
       "files": [
         "src/components/Header.tsx",
         "src/components/Footer.tsx",
@@ -21,34 +21,33 @@
     },
     {
       "name": "Project Showcase",
-      "purpose": "Displays a list of projects and detailed case studies via dynamic routing.",
+      "purpose": "Displays individual projects via cards and detailed case study pages.",
       "files": [
         "src/components/ProjectCard.tsx",
         "src/components/Projects.tsx",
         "src/pages/ProjectsPage.tsx",
-        "src/pages/ProjectDetailPage.tsx",
-        "src/data/projects.ts"
+        "src/pages/ProjectDetailPage.tsx"
       ]
     },
     {
-      "name": "SEO & Metadata",
-      "purpose": "Manages dynamic meta tags, JSON-LD structured data, and search engine visibility.",
+      "name": "Resume Preview System",
+      "purpose": "Provides a high-resolution WebP preview of the PDF resume generated at build time.",
+      "files": [
+        "scripts/render-resume.mjs",
+        "src/components/ResumeModal.tsx"
+      ]
+    },
+    {
+      "name": "SEO and Metadata Management",
+      "purpose": "Manages dynamic meta tags, JSON-LD structured data, and sitemaps for search engine optimization.",
       "files": [
         "src/components/SEO.tsx",
         "src/pages/ProjectDetailPage.tsx"
       ]
     },
     {
-      "name": "Resume Preview System",
-      "purpose": "Converts PDF resumes into optimized WebP images at build time for fast loading.",
-      "files": [
-        "scripts/render-resume.mjs",
-        "public/abdul-wasih-resume-preview.webp"
-      ]
-    },
-    {
       "name": "User Feedback",
-      "purpose": "Provides toast notifications for user interactions.",
+      "purpose": "Handles toast notifications for user interactions.",
       "files": [
         "src/components/ui/toast.tsx",
         "src/components/ui/toaster.tsx",
@@ -57,15 +56,15 @@
     }
   ],
   "decisions": [
-    "Used createBrowserRouter and RouterProvider for compatibility with React Router v7 upgrades.",
-    "Implemented a build-time script to render PDF pages to WebP to optimize asset delivery and performance.",
-    "Utilized lazy loading and Suspense for route-based code splitting.",
-    "Applied custom security headers via netlify.toml including X-Frame-Options and X-XSS-Protection."
+    "Uses createBrowserRouter instead of traditional BrowserRouter for React Router v7 compatibility.",
+    "Implements build-time PDF rendering to WebP to ensure fast in-page resume previews without client-side heavy lifting.",
+    "Uses a centralized slugify helper in projects.ts to ensure URL consistency across the app.",
+    "Configures Netlify headers for security (XSS, Frame Options) and explicit MIME type handling."
   ],
   "risks": [
-    "Client-side routing may cause issues with direct URL access if the Netlify redirect rule (/* to /index.html) is misconfigured.",
-    "The use of 'any' in the RouterProvider future prop bypasses TypeScript safety.",
-    "Large project data in src/data/projects.ts increases bundle size as the portfolio grows."
+    "Client-side lazy loading of project pages may cause a momentary layout shift or loading state visibility.",
+    "The resume rendering script depends on @napi-rs/canvas which requires specific system binaries.",
+    "Heavy reliance on local state for navigation (targetId) via location.state might lead to unexpected behavior if deep links are used."
   ],
   "hooks": [
     {
@@ -73,56 +72,56 @@
       "kind": "file",
       "ref": "scripts/render-resume.mjs",
       "file": "scripts/render-resume.mjs",
-      "why": "Why was a build-time script chosen over a client-side PDF renderer for the resume preview?"
+      "why": "How does the build-time PDF-to-WebP conversion handle font embedding and large scale rendering?"
     },
     {
       "id": "h2",
       "kind": "function",
       "ref": "slugify",
       "file": "src/data/projects.ts",
-      "why": "How does the slugify function ensure URL consistency across different components?"
+      "why": "How is the slugification logic tested to ensure it matches the routing expected by react-router-dom?"
     },
     {
       "id": "h3",
       "kind": "decision",
-      "ref": "React Router v7 upgrade path",
+      "ref": "React Router v7 readiness",
       "file": "src/App.tsx",
-      "why": "Why did you choose createBrowserRouter over the traditional component-based approach?"
+      "why": "Why was the decision made to adopt the new router object pattern now rather than waiting for the upgrade?"
     },
     {
       "id": "h4",
       "kind": "file",
-      "ref": "src/components/SEO.tsx",
-      "file": "src/components/SEO.tsx",
-      "why": "How is the SEO component structured to handle different social sharing requirements?"
+      "ref": "src/components/Header.tsx",
+      "file": "src/components/Header.tsx",
+      "why": "The scroll listener logic for 'activeSection' updates: how do you prevent performance degradation on high-frequency scroll events?"
     },
     {
       "id": "h5",
-      "kind": "risk",
-      "ref": "Type safety in RouterProvider",
-      "file": "src/App.tsx",
-      "why": "What is the implication of using 'as any' for the v7_startTransition prop?"
+      "kind": "decision",
+      "ref": "Netlify Header Configuration",
+      "file": "netlify.toml",
+      "why": "Why was it necessary to explicitly define Content-Type for .mjs and .wasm files in the deployment config?"
     },
     {
       "id": "h6",
-      "kind": "file",
-      "ref": "netlify.toml",
-      "file": "netlify.toml",
-      "why": "Can you explain the rationale behind the specific security headers configured here?"
+      "kind": "risk",
+      "ref": "Client-side SEO",
+      "file": "src/pages/ProjectDetailPage.tsx",
+      "why": "Since SEO tags are managed via react-helmet-async, how do you ensure search crawlers see the JSON-LD structured data?"
     },
     {
       "id": "h7",
       "kind": "function",
       "ref": "scrollToSection",
       "file": "src/components/Header.tsx",
-      "why": "How do you handle the offset calculation to ensure smooth scrolling doesn't land under the sticky header?"
+      "why": "The manual calculation of headerOffset: how do you ensure this remains accurate if the header height changes?"
     },
     {
       "id": "h8",
-      "kind": "decision",
-      "ref": "Monochrome aesthetic",
-      "file": "src/index.css",
-      "why": "How was the design system implemented to maintain the minimalist monochrome look across components?"
+      "kind": "risk",
+      "ref": "Asset Loading",
+      "file": "src/App.tsx",
+      "why": "The use of Suspense with SectionLoader: how do you balance the granularity of code splitting against the number of loading states the user sees?"
     }
   ]
 }

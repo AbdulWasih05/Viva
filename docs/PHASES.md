@@ -101,15 +101,15 @@ Pure, testable logic that the Mastra agent will call.
 
 ## Phase 2: Mastra interviewer agent (Sat night, 3 h)
 
-- [ ] **2.1 Agent**: `src/mastra/agents/interviewer.ts` using the Phase 1 prompts and persona instructions; one turn = evaluate + decide + ask
-- [ ] **2.2 Tools**: `listFiles`, `readFile(path, range?)` (validated paths only, size capped), `getProvenance(path)` (stub until Phase 3)
-  - [ ] Verify: in deep-dive rounds the agent opens a file it was not given up front and asks about its contents; log an example `[POST]`
-- [ ] **2.3 Memory (local mode)**: `saveWeakSpots` at report time, `recallWeakSpots` at session start, keyed by repo; storage file at `MEMORY_DB_PATH`; "forget this project" function
-  - [ ] Verify: run two sessions on one fixture; second opens with "Last time you struggled with X" and retests it, 3 of 3 tries
-- [ ] **2.4 Progress vs last session** in the report data (score delta per topic)
-- [ ] **2.5 Hosted mode**: memory disabled cleanly, with a label explaining it is a local-mode feature
-- [ ] **2.6 Evals still pass** with the agent in the loop; note any change in latency `[POST]`
-- [ ] "How it works" summary for Wasih in PROGRESS.md
+- [x] **2.1 Agent**: `src/mastra/agents/interviewer.ts` using the Phase 1 prompts and persona instructions; one turn = evaluate + decide + ask (the agent writes the code questions; evaluation stays a plain call, DECISIONS D44)
+- [x] **2.2 Tools**: `listFiles`, `readFile(path, range?)` (validated paths only, size capped), `getProvenance(path)` (stub until Phase 3)
+  - [x] Verify: in deep-dive rounds the agent opens a file it was not given up front and asks about its contents; log an example `[POST]` (18 of 18 code questions in the eval)
+- [x] **2.3 Memory (local mode)**: `saveWeakSpots` at report time, `recallWeakSpots` at session start, keyed by repo; storage file at `MEMORY_DB_PATH`; "forget this project" function
+  - [x] Verify: run two sessions on one fixture; second opens with "Last time you struggled with X" and retests it, 3 of 3 tries
+- [x] **2.4 Progress vs last session** in the report data (score delta per topic)
+- [x] **2.5 Hosted mode**: memory disabled cleanly, with a label explaining it is a local-mode feature
+- [x] **2.6 Evals still pass** with the agent in the loop; note any change in latency `[POST]`
+- [x] "How it works" summary for Wasih in PROGRESS.md
 
 ---
 

@@ -84,7 +84,10 @@ src/
   mastra/
     index.ts                 Mastra instance
     agents/interviewer.ts    the interviewer agent (instructions per persona)
-    tools/                   readFile, listFiles, getProvenance, recallWeakSpots, saveWeakSpots
+    tools/repo.ts            readFile, listFiles, getProvenance (paths validated against the real file list)
+    context.ts               per-request repo, persona and role, carried in Mastra's RequestContext
+    generate.ts, deps.ts     run the agent for one question; plug it into the turn logic
+    memory.ts                recallWeakSpots, saveWeakSpots, forgetProject (plain functions, local mode only)
   lib/
     llm/                     model provider setup, zod structured-output helpers
     ingest/                  GitHub + local readers, file selection, token budget
@@ -112,6 +115,7 @@ pnpm lint         # eslint
 pnpm test         # vitest run
 pnpm eval         # scripted interviews against the fixtures, prints quality metrics: `pnpm eval` or `pnpm eval portfolio-new`
 pnpm interview    # terminal interview: `pnpm interview <fixture | github url | folder> [friendly|tough] [5-12]`
+pnpm tsx --env-file=.env scripts/memory-check.ts 3   # two-session memory check (uses a temp database)
 pnpm bench        # model benchmark, reads .env: `pnpm bench hosted 5` or `pnpm bench ollama 3`
 ```
 

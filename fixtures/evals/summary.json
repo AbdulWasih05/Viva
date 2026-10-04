@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-04T04:14:08.753Z",
+  "date": "2026-10-04T04:59:07.899Z",
   "provider": "hosted",
   "model": "gemma-4-26b-a4b-it",
   "fixtures": [
@@ -7,30 +7,30 @@
     "vidyut-mitra"
   ],
   "mainQuestions": 5,
-  "modelCalls": 111,
-  "validAfterRepair": "109/111 (98%)",
-  "neededRepair": "8/111 (7%)",
+  "modelCalls": 119,
+  "validAfterRepair": "119/119 (100%)",
+  "neededRepair": "1/119 (1%)",
   "deepDiveNamesRealFile": "6/6 (100%)",
+  "agentOpenedAFile": "18/18 (100%)",
+  "agentRefusedInventedPath": 0,
   "inventedPathsDropped": {
     "inBriefs": 0,
     "inQuestions": 0
   },
-  "followUpQuoteFoundInAnswer": "42/43 (98%)",
+  "followUpQuoteFoundInAnswer": "51/51 (100%)",
   "averageScore": {
-    "good": "3.44",
+    "good": "2.95",
     "vague": "0.00",
     "wrong": "0.00"
   },
-  "rateLimitedCalls": "0/111 (0%)",
-  "callsThatWaitedForBudget": "24/111 (22%)",
-  "inputTokens": 171665,
+  "rateLimitedCalls": "0/119 (0%)",
+  "callsThatWaitedForBudget": "47/119 (39%)",
+  "inputTokens": 238161,
   "medianMs": {
-    "brief": 29373,
-    "question": 7403,
-    "evaluation": 6702,
-    "report": 15042
+    "brief": 31948,
+    "question": 8576,
+    "evaluation": 5390,
+    "report": 14799
   },
-  "errors": [
-    ": Invalid input: expected object, received undefined"
-  ]
+  "errors": []
 }
