@@ -78,7 +78,7 @@ Gemma is the brain: it reads the project, decides what to ask, judges answers, a
   - Report shows progress vs last session (score change per topic).
   - Stored on the laptop only; a "forget this project" button clears it. Hosted mode: memory off, labeled as a local-mode feature.
 
-- **F5. Voice and delivery coaching (ElevenLabs)**
+- **F5. Voice and delivery coaching (ElevenLabs)**: CUT on 4 Oct 2026 (DECISIONS D78). Not built; ElevenLabs only narrates the demo video. The original text is kept below for the record.
   - TTS for interviewer questions, a different voice per persona.
   - STT for spoken answers, with word-level timestamps; transcript editable before sending.
   - **Delivery metrics** computed in code from timestamps and transcript: filler-word count and rate ("umm", "uh", "basically", "like", "actually"), long pauses (over 2 s), speaking pace (words per minute), answer length.

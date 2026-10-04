@@ -77,6 +77,7 @@ export async function createBrief(source: RepoSource, options: { correction?: st
   const filePaths = source.files.map((file) => file.path);
 
   const { value, meta } = await generateStructured({
+    label: "brief",
     instructions: BRIEF_INSTRUCTIONS,
     // The path list is capped so a huge repo cannot blow the prompt up.
     prompt: briefPrompt({ filePaths: filePaths.slice(0, MAX_PATHS_IN_PROMPT), contents, correction: options.correction }),

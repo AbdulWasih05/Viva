@@ -127,6 +127,7 @@ export async function buildReport(
 ): Promise<{ report: Report; meta: StructuredMeta }> {
   const stats = computeStats(state);
   const { value: draft, meta } = await generateStructured({
+    label: "report",
     instructions: REPORT_INSTRUCTIONS,
     prompt: reportPrompt(state),
     schema: ReportDraftSchema,

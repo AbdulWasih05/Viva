@@ -20,6 +20,7 @@
     "@mastra/core": "^1.74.0",
     "@mastra/libsql": "^1.25.0",
     "@mastra/memory": "^1.35.0",
+    "@sentry/nextjs": "^11.4.0",
     "next": "16.3.8",
     "react": "19.2.8",
     "react-dom": "19.2.8",

@@ -31,6 +31,11 @@ All times IST. Deadline: **Mon 5 Oct, 12:29 PM**. Internal publish target: **Mon
 6. Sentry dashboard (keep traced spans + attributes + screenshots)
 7. Line-level provenance (keep file-level AI-authored map)
 
+**Cuts applied on 4 Oct (Wasih's decision, DECISIONS D78, D79):**
+- Phase 6 (voice in the app) is cut entirely: no TTS, no STT, no delivery coaching. ElevenLabs is used only to narrate the demo video. This goes further than cut items 2 and 4.
+- Phase 7 is reduced to: Sentry setup, AI SDK integration with inputs and outputs off, quality attributes on the model and turn spans, 3 traced interviews, screenshots. No dashboard and no model comparison (cut item 6 and more).
+- Earlier: cut item 3 (no private Ollama service on Render, D6) and cut item 7 (file-level provenance only, D20).
+
 **Never cut:** core interview with grounded follow-ups, Mastra agent with readFile + memory, Entire provenance questions, hosted demo, friend test, demo video, the post.
 
 ---
@@ -153,25 +158,30 @@ Pure, testable logic that the Mastra agent will call.
 
 ---
 
-## Phase 6: ElevenLabs voice and delivery coaching (Sun afternoon, 2.5 h)
+## ~~Phase 6: ElevenLabs voice and delivery coaching (Sun afternoon, 2.5 h)~~ CUT (DECISIONS D78)
 
-- [ ] **6.1 TTS** `/api/tts`: persona voices (Friendly HR, Tough tech lead); autoplay in voice mode; cache per question
-- [ ] **6.2 STT** `/api/stt`: push-to-talk recording, ElevenLabs speech-to-text with word timestamps; editable transcript before sending
-- [ ] **6.3 Delivery metrics** in `src/lib/delivery/` (pure functions, unit tested): filler words and rate, long pauses (over 2 s), wpm, duration
-- [ ] **6.4 Report**: "How you said it" section with simple targets; per-answer delivery chips
-- [ ] **6.5 Fallbacks**: mic denied or no key means text mode; note in UI that voice mode sends audio to ElevenLabs
-- [ ] **6.6 Verify** a full voice interview locally and on Render; save a clip
+Voice was dropped from the app on 4 Oct to protect the core. None of the tasks below were built.
+
+- [ ] ~~**6.1 TTS** `/api/tts`: persona voices (Friendly HR, Tough tech lead); autoplay in voice mode; cache per question~~
+- [ ] ~~**6.2 STT** `/api/stt`: push-to-talk recording, ElevenLabs speech-to-text with word timestamps; editable transcript before sending~~
+- [ ] ~~**6.3 Delivery metrics** in `src/lib/delivery/` (pure functions, unit tested): filler words and rate, long pauses (over 2 s), wpm, duration~~
+- [ ] ~~**6.4 Report**: "How you said it" section with simple targets; per-answer delivery chips~~
+- [ ] ~~**6.5 Fallbacks**: mic denied or no key means text mode; note in UI that voice mode sends audio to ElevenLabs~~
+- [ ] ~~**6.6 Verify** a full voice interview locally and on Render; save a clip~~
 
 ---
 
 ## Phase 7: Sentry tracing (Sun afternoon, 1.5 h)
 
-- [ ] **7.1 Setup** Sentry for Next.js; enable the AI SDK / Mastra integration for automatic model spans if available, else manual spans in the provider module
-- [ ] **7.2 Turn span** as parent: tool calls (`readFile`, `getProvenance`, memory) and model calls as children
-- [ ] **7.3 Quality attributes**: `invented_paths_dropped`, `json_repair_used`, `question_names_real_file`, `ai_authored_question`, `followup_references_answer`, `persona`, `model`, `provider`
+- [x] **7.1 Setup** Sentry for Next.js; enable the AI SDK / Mastra integration for automatic model spans if available, else manual spans in the provider module (manual setup instead of the interactive wizard; AI SDK integration on with inputs and outputs off; manual spans in the model module)
+- [x] **7.2 Turn span** as parent: tool calls (`readFile`, `getProvenance`, memory) and model calls as children
+- [x] **7.3 Quality attributes**: `invented_paths_dropped`, `json_repair_used`, `question_names_real_file`, `ai_authored_question`, `followup_references_answer`, `persona`, `model`, `provider`
 - [ ] **7.4 Privacy**: confirm no answer text or audio in spans or breadcrumbs
-- [ ] **7.5 Comparison**: run evals on local ~4B and hosted larger Gemma with tracing on; dashboard or screenshots comparing latency, repair rate, real-file rate `[POST]`
-- [ ] **7.6 Debugging story**: find one real issue via traces, fix it, before/after numbers `[POST]` `[WHY]`
+  - [x] Our own spans checked locally with `SENTRY_DEBUG_SPANS=true`: attributes are booleans, numbers and short labels only
+  - [ ] Check in the Sentry UI that the automatic HTTP spans carry no request bodies (needs a DSN)
+- [ ] **7.4a** 3 traced interviews and screenshots into `docs/post/` (needs `SENTRY_DSN`)
+- [ ] ~~**7.5 Comparison**: run evals on local ~4B and hosted larger Gemma with tracing on; dashboard or screenshots comparing latency, repair rate, real-file rate `[POST]`~~ cut (D79)
+- [ ] ~~**7.6 Debugging story**: find one real issue via traces, fix it, before/after numbers `[POST]` `[WHY]`~~ cut (D79); the server-log debugging story from Phase 4 (D68) is the nearest equivalent
 
 ---
 
