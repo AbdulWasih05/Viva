@@ -127,13 +127,17 @@ Pure, testable logic that the Mastra agent will call.
 
 ## Phase 4: Text UI (Sun morning, 2.5 h)
 
-- [ ] **4.1 API routes** `/api/ingest`, `/api/turn`, `/api/report`: thin, zod-validated, stateless
-- [ ] **4.2 Start screen**: repo input (folder path in local mode), persona, length, target role, voice toggle, sample repo buttons, mode badge
-- [ ] **4.3 Brief screen**: summary, stack, hooks, AI-written areas, "last time" weak spots, correction box
-- [ ] **4.4 Interview screen**: chat, round label, progress, answer box, skip, end early, live tool activity text ("reading src/auth.ts...")
-- [ ] **4.5 Report screen**: per-question cards (AI-code flag), weak spots, revision list, likely next questions, delivery section placeholder, progress vs last, Markdown export
-- [ ] **4.6 Error states**: bad URL, rate limit, model down, retry
+- [x] **4.1 API routes** `/api/ingest`, `/api/turn`, `/api/report`: thin, zod-validated, stateless
+- [x] **4.2 Start screen**: repo input (folder path in local mode), persona, length, target role, voice toggle, sample repo buttons, mode badge
+- [x] **4.3 Brief screen**: summary, stack, hooks, AI-written areas, "last time" weak spots, correction box
+- [x] **4.4 Interview screen**: chat, round label, progress, answer box, skip, end early, live tool activity text ("reading src/auth.ts...")
+- [x] **4.5 Report screen**: per-question cards (AI-code flag), weak spots, revision list, likely next questions, delivery section placeholder, progress vs last, Markdown export
+- [x] **4.6 Error states**: bad URL, rate limit, model down, retry
 - [ ] **4.7 Verify** all fixtures in the browser; screenshots to `docs/post/`
+  - [x] Viva sample walked end to end in the browser (start, brief, interview, skip, end early, report)
+  - [ ] Vidyut Mitra and Portfolio samples in the browser (only checked through the API so far)
+  - [ ] Screenshots of the interview and report screens (start and brief are in `docs/post/`)
+  - [ ] Local mode in the browser: folder input, memory, forget button
 
 ---
 

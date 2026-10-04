@@ -99,19 +99,42 @@ export async function askMainQuestion(
   const hook = pickHook(state, round);
   const agent = deps.agent && AGENT_ROUNDS.includes(round) ? deps.agent : undefined;
   // Without the agent, the hook's file is pasted into the prompt. With it, the agent opens files itself.
-  const file = !agent && hook?.file ? await readForPrompt(deps, hook.file) : undefined;
+  let file = !agent && hook?.file ? await readForPrompt(deps, hook.file) : undefined;
   const retestTopic = round === "retest" ? nextRetestTopic(state) : undefined;
   const retestNumber = state.questions.filter((q) => q.round === "retest" && !q.isFollowUp).length;
 
-  const { value: draft, meta } = await generateStructured({
-    instructions: interviewerInstructions(state.settings.persona, state.settings.targetRole),
+  const instructions = interviewerInstructions(state.settings.persona, state.settings.targetRole);
+  let result = await generateStructured({
+    instructions,
     prompt: questionPrompt({ state, round, hook, file, retestTopic, toolsAvailable: Boolean(agent) }),
     schema: QuestionDraftSchema,
     fallback: fallbackQuestion(round),
     generate: agent ? agent.generate : deps.generate,
+    // The agent gets one attempt. Retrying it means repeating its tool calls, which is slow and
+    // expensive; the plain call below is the cheaper plan B.
+    maxAttempts: agent ? 1 : 2,
   });
-  const agentFiles = agent ? agent.takeFilesRead() : [];
-  const activity = agent ? agent.takeActivity() : file ? [`reading ${file.path}`] : [];
+  let agentFiles = agent ? agent.takeFilesRead() : [];
+  let activity = agent ? agent.takeActivity() : file ? [`reading ${file.path}`] : [];
+
+  // Plan B: the agent did not produce a usable question (for example it spent its steps re-reading
+  // a large file). Ask again the plain way, with the hook's file pasted into the prompt.
+  if (agent && result.meta.usedFallback) {
+    file = hook?.file ? await readForPrompt(deps, hook.file) : undefined;
+    const agentMs = result.meta.ms;
+    result = await generateStructured({
+      instructions,
+      prompt: questionPrompt({ state, round, hook, file, retestTopic, toolsAvailable: false }),
+      schema: QuestionDraftSchema,
+      fallback: fallbackQuestion(round),
+      generate: deps.generate,
+    });
+    result.meta.ms += agentMs;
+    result.meta.repaired = true;
+    agentFiles = [];
+    activity = file ? [`reading ${file.path}`] : [];
+  }
+  const { value: draft, meta } = result;
 
   // The "last time" sentence is written by code, so a returning session always opens with it.
   const retestIntro = !retestTopic

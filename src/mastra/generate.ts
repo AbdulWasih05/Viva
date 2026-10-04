@@ -10,13 +10,18 @@ import type { Persona } from "../lib/interview/schemas";
 import { createRequestContext, type RepoContext } from "./context";
 import { mastra } from "./index";
 
-/** Tool calls, then the answer. Each step is one request to the model. */
+/**
+ * Two tool calls, one spare step in case the model tries a third (the tools refuse it), then the answer.
+ * Each step is one request to the model and resends the prompt.
+ */
 const MAX_STEPS = 4;
 
 export function interviewerGenerate(input: { repo: RepoContext; persona: Persona; targetRole: string }): GenerateFn {
   return async ({ prompt, schema, timeoutMs }) => {
     // A call with tools resends the prompt on every step, so budget for about two steps.
-    const pacedMs = getProvider() === "hosted" ? await paceHostedCall(prompt.length * 2) : 0;
+    const pace = getProvider() === "hosted" ? await paceHostedCall(prompt.length * 2) : undefined;
+    // Every attempt (including the repair retry) starts with a fresh tool allowance.
+    input.repo.toolCalls = 0;
 
     const res = await mastra.getAgent("interviewer").generate(prompt, {
       requestContext: createRequestContext(input),
@@ -28,6 +33,8 @@ export function interviewerGenerate(input: { repo: RepoContext; persona: Persona
     });
 
     const usage = res.usage as { inputTokens?: number; outputTokens?: number } | undefined;
-    return { object: res.object, inputTokens: usage?.inputTokens, outputTokens: usage?.outputTokens, pacedMs };
+    // The real token count replaces the estimate, so the next call is paced on what was actually sent.
+    pace?.settle(usage?.inputTokens);
+    return { object: res.object, inputTokens: usage?.inputTokens, outputTokens: usage?.outputTokens, pacedMs: pace?.waitedMs ?? 0 };
   };
 }

@@ -116,3 +116,24 @@ Verified: `pnpm typecheck`, `pnpm lint`, `pnpm test` (63 unit tests) and `pnpm b
   - The prompt is taken from the session transcript: the first thing the person typed after the previous checkpoint.
   - Up to three of those files become "ai-authored" hooks, and the deep-dive round uses one of them first.
   - Code writes the sentence saying the session shows an agent wrote the file and quotes the prompt; Gemma then asks how the code works. A repo without checkpoints skips all of this and shows a one-line hint.
+
+## 4 Oct 2026: Phase 4 (text UI and API routes)
+
+What was built: API routes `/api/ingest`, `/api/turn`, `/api/report`, `/api/memory` and `/api/health` (thin, zod-validated, stateless); four screens in `src/components` (start, brief, interview, report) driven by one client component; error states with retry; Markdown download and copy.
+
+Verified: `pnpm typecheck`, `pnpm lint`, `pnpm test` (63 tests) and `pnpm build` pass. Against the production build (`pnpm start`, hosted mode):
+
+- **API walk by script:** health; three error cases (bad URL, invalid state, missing repo) each returned HTTP 400 with a readable message; ingest of the Viva sample in 28 ms (saved brief, 11 hooks, 26 AI-written files, 3 checkpoints); turns; end early; report.
+- **Browser walk** on the Viva sample: start screen, brief with the AI-written areas panel, first question, an answer scored 2/4 with the follow-up "You mentioned a state machine runs the scoring; how exactly is that state machine implemented in the codebase?", a skip shown as skipped, a decisions question with the line "Before asking, Viva was reading src/mastra/index.ts", end early, and the full report with strengths, weak spots, revision list and five likely next questions.
+- **Not verified:** the Vidyut Mitra and Portfolio samples were only exercised through the API, not clicked through in the browser. Screenshots exist for the start and brief screens only (`docs/post/ui-*.jpg`); the browser window was hidden during the walk, so later screens were checked by reading the page text instead of by picture. Markdown download and copy were not clicked. Local mode (folder input, memory, forget button) was not walked in the browser.
+
+- `[POST]` **Turn times in the running app** (Viva sample, production build, 4 Oct 2026, from the server log): plain calls 4.4 to 6.3 s; an agent question that read one file 6.3 to 9.1 s; a whole turn (evaluation plus next question) 10.7 to 13.5 s. The PRD target of 8 s per turn is met only by turns that end in a follow-up.
+- `[POST]` `[WHY]` **The two-minute turns.** The first server test had turns of 120 and 128 s that ended in the generic fallback question. The server log (added for this) showed Gemma re-reading one file four times and once emitting `MALFORMED_FUNCTION_CALL`, then the retry eating half the per-minute token quota. Fix in DECISIONS D68 and D69.
+- `[POST]` `[WHY]` **Stale screenshots, not a broken app.** During the browser walk the sample buttons seemed dead: three screenshots in a row showed the start screen. The page had in fact moved on; the browser window was hidden and not repainting. `document.visibilityState` said "hidden". Lesson: check the page text before debugging the code.
+- **Known gaps:** tool activity is shown after the turn, not live (no streaming). A script that answers instantly makes the token pacer wait 30 to 40 s; a person typing answers should rarely hit it, but two simultaneous visitors on the hosted demo will.
+- **How it works (Phase 4, plain language):**
+  - The page is one React component with four steps. It keeps the whole interview in the browser.
+  - "Read my project" calls `/api/ingest`, which loads the repo, reads Entire provenance, and returns the brief.
+  - Each answer goes to `/api/turn` together with the whole interview so far. The server scores it, asks the agent or the model for the next question, and sends the updated interview back.
+  - `/api/report` computes the scores, has Gemma write the coaching text, and in local mode saves the weak spots.
+  - Every route checks its input with zod and turns any failure into a clear JSON error, so the page can show a message and a "Try again" link.
