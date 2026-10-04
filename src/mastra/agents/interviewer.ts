@@ -16,7 +16,7 @@ const TOOL_RULES = [
   "- readFile(path): open a file. Do this before asking how a specific piece of code works, and base the question on what you read.",
   "- listFiles(folder?): see which files exist.",
   "- getProvenance(path): check whether an AI coding agent wrote the file, and from which prompt.",
-  "Use at most two tool calls per question. Never ask about code you have not read.",
+  "You may make at most two tool calls per question; read a file once, not repeatedly. Never ask about code you have not read.",
 ].join("\n");
 
 export const interviewer = new Agent({

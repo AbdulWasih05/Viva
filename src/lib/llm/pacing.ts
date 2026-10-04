@@ -46,14 +46,28 @@ export function msUntilBudget(usage: Usage[], tokens: number, now: number, limit
 
 const usage: Usage[] = [];
 
-/** Waits if needed, then records the call. Call this right before sending a hosted request. */
-export async function paceHostedCall(promptChars: number): Promise<number> {
+/**
+ * Waits if needed, then records the call. Call this right before sending a hosted request.
+ * Returns how long it waited and a `settle` function: call it afterwards with the real input-token
+ * count the provider reported, so the record is exact instead of an estimate. That matters for
+ * agent calls, where every tool step sends the prompt again and the real cost is higher.
+ */
+export async function paceHostedCall(promptChars: number): Promise<{ waitedMs: number; settle: (actualTokens?: number) => void }> {
   const tokens = estimatePromptTokens(promptChars);
-  const wait = msUntilBudget(usage, tokens, Date.now(), tokensPerMinuteLimit());
-  if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+  const waitedMs = msUntilBudget(usage, tokens, Date.now(), tokensPerMinuteLimit());
+  if (waitedMs > 0) {
+    console.info(`[viva] waiting ${Math.round(waitedMs / 1000)} s for the hosted model's tokens-per-minute budget`);
+    await new Promise((resolve) => setTimeout(resolve, waitedMs));
+  }
   const now = Date.now();
-  usage.push({ at: now, tokens });
+  const entry: Usage = { at: now, tokens };
+  usage.push(entry);
   // Forget entries that can no longer matter.
   while (usage.length > 0 && now - usage[0].at >= WINDOW_MS) usage.shift();
-  return wait;
+  return {
+    waitedMs,
+    settle: (actualTokens) => {
+      if (actualTokens && actualTokens > 0) entry.tokens = actualTokens;
+    },
+  };
 }

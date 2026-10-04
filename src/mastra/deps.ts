@@ -12,7 +12,10 @@ export function createAgentDeps(source: RepoSource, settings: Pick<Settings, "pe
     agent: {
       generate: interviewerGenerate({ repo, persona: settings.persona, targetRole: settings.targetRole }),
       // splice(0) empties the list and returns what was in it, so each question reports only its own activity.
-      takeFilesRead: () => repo.filesRead.splice(0),
+      takeFilesRead: () => {
+        repo.toolCalls = 0; // the next question gets a fresh tool allowance
+        return repo.filesRead.splice(0);
+      },
       takeActivity: () => repo.activity.splice(0),
     },
   };

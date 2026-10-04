@@ -16,6 +16,8 @@ export type RepoContext = {
   filesRead: string[];
   /** Human-readable lines for the UI's status text ("reading src/auth.ts"). */
   activity: string[];
+  /** Tool calls made for the current question. The tools refuse once the limit is reached. */
+  toolCalls: number;
 };
 
 export type VivaContext = {
@@ -25,7 +27,7 @@ export type VivaContext = {
 };
 
 export function createRepoContext(input: Pick<RepoContext, "filePaths" | "readFile"> & { provenance?: ProvenanceEntry[] }): RepoContext {
-  return { filePaths: input.filePaths, readFile: input.readFile, provenance: input.provenance ?? [], filesRead: [], activity: [] };
+  return { filePaths: input.filePaths, readFile: input.readFile, provenance: input.provenance ?? [], filesRead: [], activity: [], toolCalls: 0 };
 }
 
 export function createRequestContext(values: VivaContext): RequestContext<VivaContext> {

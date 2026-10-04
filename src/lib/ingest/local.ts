@@ -44,6 +44,7 @@ export async function loadLocalRepo(folder: string): Promise<RepoSource> {
     throw new Error("Local folders can only be read in local mode (LOCAL_MODE=true).");
   }
   const root = path.resolve(folder);
-  const source = await loadFolder(root, `local:${root.replaceAll("\\", "/").toLowerCase()}`, path.basename(root));
+  // The id keeps the path as typed (not lower-cased) so it can be turned back into a folder on any OS.
+  const source = await loadFolder(root, `local:${root.replaceAll("\\", "/")}`, path.basename(root));
   return { ...source, origin: { kind: "local", folder: root } };
 }

@@ -10,8 +10,22 @@ import { normalizePath } from "../../lib/interview/brief";
 import type { RepoContext } from "../context";
 
 /** How much of one file a single readFile call may return. */
-export const TOOL_FILE_CAP_CHARS = 4_000;
+export const TOOL_FILE_CAP_CHARS = 3_000;
 const MAX_LISTED_PATHS = 150;
+/**
+ * Tool calls allowed per question. Every tool call makes the model resend the whole prompt, and
+ * without a limit Gemma re-read the same file up to four times, ran out of steps before writing
+ * its question, and used about 8,000 tokens of a 16,000 per minute quota on one question.
+ */
+export const MAX_TOOL_CALLS = 2;
+const LIMIT_MESSAGE = "Tool limit reached for this question. Do not call any more tools; write the question now from what you have read.";
+
+/** Counts a tool call and says whether it is still within the limit. */
+function withinLimit(repo: RepoContext): boolean {
+  repo.toolCalls += 1;
+  if (repo.toolCalls > MAX_TOOL_CALLS) console.info("[viva] agent tool call refused: limit reached");
+  return repo.toolCalls <= MAX_TOOL_CALLS;
+}
 
 /** Pulls the current repo out of the request context that Mastra hands to every tool call. */
 function repoFrom(context: { requestContext?: { get: (key: string) => unknown } }): RepoContext {
@@ -26,9 +40,10 @@ export const listFiles = createTool({
   inputSchema: z.object({
     folder: z.string().optional().describe('Folder to list, for example "src/components". Leave out for the whole repo.'),
   }),
-  outputSchema: z.object({ paths: z.array(z.string()), truncated: z.boolean() }),
+  outputSchema: z.object({ paths: z.array(z.string()), truncated: z.boolean(), note: z.string().optional() }),
   execute: async (input, context) => {
     const repo = repoFrom(context);
+    if (!withinLimit(repo)) return { paths: [], truncated: false, note: LIMIT_MESSAGE };
     const prefix = input.folder ? `${normalizePath(input.folder).replace(/\/$/, "")}/` : "";
     const paths = repo.filePaths.filter((path) => path.startsWith(prefix));
     repo.activity.push(prefix ? `listing ${prefix}` : "listing files");
@@ -56,6 +71,7 @@ export const readFile = createTool({
   execute: async (input, context) => {
     const repo = repoFrom(context);
     const path = normalizePath(input.path);
+    if (!withinLimit(repo)) return { found: false, path, content: "", truncated: false, error: LIMIT_MESSAGE };
     if (!repo.filePaths.includes(path)) {
       // The model invented a path. Tell it so, and let it pick a real one.
       repo.activity.push(`refused ${path} (not a real file)`);
@@ -85,10 +101,12 @@ export const getProvenance = createTool({
   outputSchema: z.object({
     aiAuthored: z.boolean(),
     entries: z.array(z.object({ commit: z.string(), promptSummary: z.string() })),
+    note: z.string().optional(),
   }),
   execute: async (input, context) => {
     const repo = repoFrom(context);
     const path = normalizePath(input.path);
+    if (!withinLimit(repo)) return { aiAuthored: false, entries: [], note: LIMIT_MESSAGE };
     // Filled from Entire checkpoints in Phase 3; until then the list is empty and this answers "no".
     const entries = repo.provenance.filter((entry) => entry.path === path);
     repo.activity.push(`checking who wrote ${path}`);
