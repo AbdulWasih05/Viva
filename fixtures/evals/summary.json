@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-04T04:14:08.753Z",
+  "provider": "hosted",
+  "model": "gemma-4-26b-a4b-it",
+  "fixtures": [
+    "portfolio-new",
+    "vidyut-mitra"
+  ],
+  "mainQuestions": 5,
+  "modelCalls": 111,
+  "validAfterRepair": "109/111 (98%)",
+  "neededRepair": "8/111 (7%)",
+  "deepDiveNamesRealFile": "6/6 (100%)",
+  "inventedPathsDropped": {
+    "inBriefs": 0,
+    "inQuestions": 0
+  },
+  "followUpQuoteFoundInAnswer": "42/43 (98%)",
+  "averageScore": {
+    "good": "3.44",
+    "vague": "0.00",
+    "wrong": "0.00"
+  },
+  "rateLimitedCalls": "0/111 (0%)",
+  "callsThatWaitedForBudget": "24/111 (22%)",
+  "inputTokens": 171665,
+  "medianMs": {
+    "brief": 29373,
+    "question": 7403,
+    "evaluation": 6702,
+    "report": 15042
+  },
+  "errors": [
+    ": Invalid input: expected object, received undefined"
+  ]
+}

@@ -10,6 +10,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "eval": "tsx --env-file-if-exists=.env scripts/eval.ts",
+    "interview": "tsx --env-file-if-exists=.env scripts/interview.ts",
     "bench": "tsx --env-file-if-exists=.env scripts/bench-models.ts"
   },
   "engines": {
