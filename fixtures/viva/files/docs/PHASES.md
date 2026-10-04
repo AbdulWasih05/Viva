@@ -115,13 +115,13 @@ Pure, testable logic that the Mastra agent will call.
 
 ## Phase 3: Entire provenance (Sun early, 2.5 h)
 
-- [x] **3.1 Reader (local)**: read checkpoints from a local repo via git (or Entire CLI output), map commits to changed files, extract the originating prompt per checkpoint
-- [x] **3.2 Reader (hosted)**: same via GitHub API for public repos; graceful skip if refs are not readable
-- [x] **3.3 AI-authored map**: `ProvenanceEntry[]`; use attribution or line data if available, otherwise file-level; summarize long prompts to one line with Gemma
-- [x] **3.4 Wire into the agent**: real `getProvenance` tool; brief gets `ai-authored` hooks; interviewer instructions require at least one AI-code question and allow quoting the original prompt
-- [x] **3.5 UI data**: "AI-written areas" list for the brief screen; report flags AI-code questions
-- [x] **3.6 Dogfood fixture**: snapshot this repo (with its checkpoints) as fixture 4; verify Viva asks Wasih about code his agent wrote; save a good example `[POST]`
-- [x] **3.7 No-checkpoint path**: quiet skip plus a short hint about Entire
+- [ ] **3.1 Reader (local)**: read checkpoints from a local repo via git (or Entire CLI output), map commits to changed files, extract the originating prompt per checkpoint
+- [ ] **3.2 Reader (hosted)**: same via GitHub API for public repos; graceful skip if refs are not readable
+- [ ] **3.3 AI-authored map**: `ProvenanceEntry[]`; use attribution or line data if available, otherwise file-level; summarize long prompts to one line with Gemma
+- [ ] **3.4 Wire into the agent**: real `getProvenance` tool; brief gets `ai-authored` hooks; interviewer instructions require at least one AI-code question and allow quoting the original prompt
+- [ ] **3.5 UI data**: "AI-written areas" list for the brief screen; report flags AI-code questions
+- [ ] **3.6 Dogfood fixture**: snapshot this repo (with its checkpoints) as fixture 4; verify Viva asks Wasih about code his agent wrote; save a good example `[POST]`
+- [ ] **3.7 No-checkpoint path**: quiet skip plus a short hint about Entire
 
 ---
 

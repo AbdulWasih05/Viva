@@ -1,0 +1,20 @@
+[
+  {
+    "fixture": "viva",
+    "candidate": "good",
+    "aiQuestions": 1,
+    "example": "Your Entire session shows an AI agent wrote src/lib/interview/prompts.ts (the prompt was: \"1,2 isdone lets skip teh devrealy install, render and eleven labs credits i will claim, yep lets do stacked prs\"). In `src/lib/interview/prompts.ts`, how does the `briefPrompt` function ensure that the LLM generates accurate information about the project's files and structure?"
+  },
+  {
+    "fixture": "viva",
+    "candidate": "vague",
+    "aiQuestions": 1,
+    "example": "Your Entire session shows an AI agent wrote src/lib/interview/prompts.ts (the prompt was: \"1,2 isdone lets skip teh devrealy install, render and eleven labs credits i will claim, yep lets do stacked prs\"). In `src/lib/interview/prompts.ts`, how does the `briefPrompt` function construct its instructions for the LLM? Specifically, how does it handle file contents and candidate corrections?"
+  },
+  {
+    "fixture": "viva",
+    "candidate": "wrong",
+    "aiQuestions": 1,
+    "example": "Your Entire session shows an AI agent wrote src/lib/interview/prompts.ts (the prompt was: \"1,2 isdone lets skip teh devrealy install, render and eleven labs credits i will claim, yep lets do stacked prs\"). In `src/lib/interview/prompts.ts`, explain how the `briefPrompt` function structures the input for the LLM. Why did you include a `correction` field in that prompt?"
+  }
+]

@@ -1,0 +1,152 @@
+{
+  "summary": "Viva is an automated technical interview system built with Next.js and Mastra. It uses LLMs to ingest code repositories, generate project briefs, and conduct interactive interview sessions with candidates.",
+  "stack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "@mastra/core",
+    "@mastra/memory",
+    "@mastra/libsql",
+    "Zod",
+    "Vitest",
+    "TailwindCSS"
+  ],
+  "components": [
+    {
+      "name": "Interview Engine",
+      "purpose": "Manages the logic for interview turns, question generation, and state transitions.",
+      "files": [
+        "src/lib/interview/turn.ts",
+        "src/lib/interview/state.ts",
+        "src/lib/interview/schemas.ts",
+        "src/lib/interview/prompts.ts"
+      ]
+    },
+    {
+      "name": "Agent Framework",
+      "purpose": "Implements the interviewer agent using the Mastra framework to handle tools and memory.",
+      "files": [
+        "src/mastra/index.ts",
+        "src/mastra/agents/interviewer.ts",
+        "src/mastra/generate.ts"
+      ]
+    },
+    {
+      "name": "Ingestion System",
+      "purpose": "Handles reading and selecting files from various sources like GitHub or local directories.",
+      "files": [
+        "src/lib/ingest/github.ts",
+        "src/lib/ingest/local.ts",
+        "src/lib/ingest/select.ts",
+        "src/lib/ingest/types.ts"
+      ]
+    },
+    {
+      "name": "LLM Utilities",
+      "purpose": "Provides structured output generation and provider routing for different LLM backends.",
+      "files": [
+        "src/lib/llm/structured.ts",
+        "src/lib/llm/provider.ts",
+        "src/lib/llm/pacing.ts"
+      ]
+    },
+    {
+      "name": "Evaluation Suite",
+      "purpose": "Scripts for benchmarking models and evaluating agent performance against scripted candidates.",
+      "files": [
+        "scripts/eval.ts",
+        "scripts/bench-models.ts",
+        "scripts/interview.ts"
+      ]
+    }
+  ],
+  "decisions": [
+    "Uses Mastra for agent orchestration and memory management.",
+    "Implements a state machine approach to manage interview flow in src/lib/interview/state.ts.",
+    "Supports both hosted LLMs and local Ollama endpoints via configuration in .env."
+  ],
+  "risks": [
+    "Potential for model hallucination in file paths (mitigated by validation in eval/bench scripts).",
+    "Rate limiting risks when reading large repositories via GitHub API.",
+    "Complexity in maintaining structured output consistency across different LLM providers."
+  ],
+  "hooks": [
+    {
+      "id": "h1",
+      "kind": "file",
+      "ref": "Interviewer persona instructions",
+      "file": "src/lib/interview/prompts.ts",
+      "why": "How are the 'friendly' vs 'tough' personas implemented and how do they influence the question generation?"
+    },
+    {
+      "id": "h2",
+      "kind": "function",
+      "ref": "runTurn",
+      "file": "src/lib/interview/turn.ts",
+      "why": "Explain how the turn logic handles the transition between the agent-led rounds and fallback questions."
+    },
+    {
+      "id": "h3",
+      "kind": "decision",
+      "ref": "Mastra Agent registration",
+      "file": "src/mastra/index.ts",
+      "why": "Why was the decision made to register agents centrally in the Mastra instance?"
+    },
+    {
+      "id": "h4",
+      "kind": "risk",
+      "ref": "JSON repair and fallback",
+      "file": "src/lib/llm/structured.ts",
+      "why": "How robust is the system if the LLM fails to follow the Zod schema after multiple repair attempts?"
+    },
+    {
+      "id": "h5",
+      "kind": "file",
+      "ref": "Ingestion selection logic",
+      "file": "src/lib/ingest/select.ts",
+      "why": "What is the strategy for selecting which files to include in the prompt to avoid context window overflow?"
+    },
+    {
+      "id": "h6",
+      "kind": "function",
+      "ref": "quoteAppearsInAnswer",
+      "file": "src/lib/interview/turn.ts",
+      "why": "How does this grounding check prevent the interviewer from hallucinating context from previous answers?"
+    },
+    {
+      "id": "h7",
+      "kind": "decision",
+      "ref": "Local vs Hosted mode",
+      "file": ".env.example",
+      "why": "How does the app behave differently when LOCAL_MODE is set to true versus false?"
+    },
+    {
+      "id": "h8",
+      "kind": "risk",
+      "ref": "Memory storage path",
+      "file": ".env.example",
+      "why": "How is the SQLite memory database managed across different deployment environments?"
+    },
+    {
+      "id": "ai1",
+      "kind": "ai-authored",
+      "ref": "AI-written code in src/lib/interview/prompts.ts",
+      "file": "src/lib/interview/prompts.ts",
+      "why": "An Entire checkpoint (01M42MK9AV357A6SS5Z24PS1J5, commit 79b8b6e) shows an AI agent session produced this file. The session's prompt: \"1,2 isdone lets skip teh devrealy install, render and eleven labs credits i will claim, yep lets do stacked prs\""
+    },
+    {
+      "id": "ai2",
+      "kind": "ai-authored",
+      "ref": "AI-written code in src/lib/interview/turn.ts",
+      "file": "src/lib/interview/turn.ts",
+      "why": "An Entire checkpoint (01M42MK9AV357A6SS5Z24PS1J5, commit 79b8b6e) shows an AI agent session produced this file. The session's prompt: \"1,2 isdone lets skip teh devrealy install, render and eleven labs credits i will claim, yep lets do stacked prs\""
+    },
+    {
+      "id": "ai3",
+      "kind": "ai-authored",
+      "ref": "AI-written code in src/mastra/index.ts",
+      "file": "src/mastra/index.ts",
+      "why": "An Entire checkpoint (01M42MK9AV357A6SS5Z24PS1J5, commit 79b8b6e) shows an AI agent session produced this file. The session's prompt: \"1,2 isdone lets skip teh devrealy install, render and eleven labs credits i will claim, yep lets do stacked prs\""
+    }
+  ]
+}
