@@ -125,6 +125,26 @@ Architecture choices and research surprises, newest at the bottom. One line of r
 - **D71. System fonts only.** The scaffold's Google font was removed so the app starts with Wi-Fi off (the offline demo scene) and builds without network access to a font service.
 - **D72. `/api/health`** returns mode, provider and model, for the uptime ping that keeps the free Render instance awake (D7).
 
+## Phase 5 (4 Oct 2026)
+
+- **D73. Blueprint:** `render.yaml` defines one free Node web service. Build `pnpm install --frozen-lockfile && pnpm build`, start `pnpm start`, health check `/api/health`, Node pinned with `NODE_VERSION=22.23.2`, `LOCAL_MODE=false`. `HOSTED_API_KEY` and `GITHUB_TOKEN` are `sync: false`, so Render asks for them and they never live in the repo. Not deployed yet: it needs a Render account and `render.yaml` on `main`.
+- **D74. `autoDeployTrigger: "off"`.** Deploys are started by hand so a push cannot change a demo that judges are using. Render's docs recommend this for Deploy-button blueprints.
+- **D75. Per-IP rate limit, hosted mode only** (`src/lib/server/rate-limit.ts`): per 10 minutes, 8 ingests, 60 turns, 8 reports per IP, read from `x-forwarded-for`. Over the limit returns HTTP 429 with a `Retry-After` header and a readable message. Counts are in memory, so they reset on restart and nothing about a visitor is stored. Reason: all visitors share one model key with a 16,000 tokens-per-minute quota (D31).
+- **D76. The limit is per IP, not global.** It stops one visitor from using the whole quota; it does not make the quota bigger. Several visitors at once are still slowed by the token pacer (D41).
+- **D77. README** now covers both modes, the Deploy button, privacy, why open models, measured numbers and limitations. It states that voice is not built yet.
+
+## Phase 6 cut and Phase 7 (4 to 5 Oct 2026)
+
+- **D78. Voice is cut from the app** (Wasih's decision, 4 Oct). No text-to-speech, no speech-to-text, no delivery coaching. ElevenLabs is used only to narrate the demo video. Reason: about half a day remained for Render, Sentry, the friend test, the video and the post, and the core interview matters more. The voice placeholders were removed from the UI, and the ElevenLabs variables from `.env.example`. The `DeliveryMetrics` schema and the report's `deliverySummary` field stay in the code, unused.
+- **D79. Sentry is minimal** (Wasih's decision): setup, AI SDK integration with inputs and outputs off, quality attributes, 3 traced interviews, screenshots. No dashboard, no model comparison, no trace-driven debugging story.
+- **D80. Manual setup instead of the wizard.** `npx @sentry/wizard` is interactive and needs a browser login, so the same pieces were written by hand: `src/instrumentation.ts`, `src/sentry.server.config.ts`, and `withSentryConfig` in `next.config.ts` (imported from `@sentry/nextjs/config`; the main entry does not export it in SDK 11). Server side only; no browser SDK, no session replay, no source-map upload.
+- **D81. Tracing is off unless `SENTRY_DSN` is set,** so local and offline use are unaffected.
+- **D82. Span layout.** One `gen_ai.invoke_agent` span per interview turn (created in `/api/turn`), with a `gen_ai.chat` span per model call (created in `generateStructured`) and a `gen_ai.execute_tool` span per file read. Helper: `src/lib/tracing`.
+- **D83. Quality attributes** (all prefixed `viva.`). On the turn: `round`, `is_follow_up`, `persona`, `invented_path_dropped`, `question_names_real_file`, `followup_references_answer`, `ai_authored_question`, `json_repair_used`, `fallback_used`, `tool_calls`, `score`. On each model call: `call` (brief, question, evaluation, report), `json_repair_used`, `fallback_used`, `rate_limited`, `waited_for_budget_ms`, plus Sentry's `gen_ai.usage.*` token counts.
+- **D84. Privacy in traces.** Our spans carry booleans, numbers and short labels only. The AI SDK integration is created with `recordInputs: false` and `recordOutputs: false`. Whether Sentry's automatic HTTP spans attach anything else has not been checked in the Sentry UI yet.
+- **D85. SDK 11 streams spans,** so `beforeSendTransaction` is ignored (the SDK says so at startup). The local check uses `beforeSendSpan`: with `SENTRY_DEBUG_SPANS=true` every AI span is printed to the server log with its attributes.
+- **D86. Unknown:** whether Sentry's AI SDK integration produces any automatic spans for Mastra's internal model calls. None showed up in the local span log; the manual spans are what is known to work.
+
 ### Research notes for later phases (unverified until used)
 
 - **Mastra:** custom OpenAI-compatible endpoint via `model: { id, url, apiKey }` (docs show LM Studio only); fallback `@ai-sdk/openai-compatible`. Structured output via `agent.generate(prompt, { structuredOutput: { schema, jsonPromptInjection, errorStrategy, fallbackValue } })`. Memory via `@mastra/memory` + `@mastra/libsql`. Official Sentry exporter `@mastra/sentry`.

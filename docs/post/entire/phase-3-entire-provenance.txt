@@ -1,0 +1,15 @@
+● Checkpoint 01M42NWD277RKX9H1T8H9F0KGY
+  session  8e82f1e9-d2f4-4d6f-9bd0-4385d281ed41
+  created  2026-10-04 05:23:44
+  author   abdulWasih05
+  tokens   58295.1k
+  commits  662dd8e feat: phase 3 Entire provenance, questions about AI-written code
+────────────────────────────────────────────────────────────
+## Intent
+
+<pasted_content id="9afb">
+Read CLAUDE.md, docs/PRD.md and docs/PHASES.md ful...
+
+## Summary
+
+*Not generated yet. Run ‘entire checkpoint explain --generate 01M42NWD277RKX9H1T8H9F0KGY‘ to create an AI summary.*

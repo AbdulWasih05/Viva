@@ -105,6 +105,7 @@ export async function askMainQuestion(
 
   const instructions = interviewerInstructions(state.settings.persona, state.settings.targetRole);
   let result = await generateStructured({
+    label: agent ? "question (agent)" : "question",
     instructions,
     prompt: questionPrompt({ state, round, hook, file, retestTopic, toolsAvailable: Boolean(agent) }),
     schema: QuestionDraftSchema,
@@ -123,6 +124,7 @@ export async function askMainQuestion(
     file = hook?.file ? await readForPrompt(deps, hook.file) : undefined;
     const agentMs = result.meta.ms;
     result = await generateStructured({
+      label: "question (plan B)",
       instructions,
       prompt: questionPrompt({ state, round, hook, file, retestTopic, toolsAvailable: false }),
       schema: QuestionDraftSchema,
@@ -222,6 +224,7 @@ export async function evaluateAnswer(
 
   const allowed = followUpAllowed(state, question);
   const { value: draft, meta } = await generateStructured({
+    label: "evaluation",
     instructions: interviewerInstructions(state.settings.persona, state.settings.targetRole),
     prompt: evaluationPrompt({ state, question, answer, followUpAllowed: allowed }),
     schema: EvaluationDraftSchema,

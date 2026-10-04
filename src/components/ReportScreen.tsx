@@ -89,10 +89,6 @@ export function ReportScreen(props: { repoLabel: string; result: ReportResult; m
         </Card>
       </div>
 
-      <Card title="How you said it">
-        <p className="text-sm text-zinc-400">{report.deliverySummary ?? "Delivery feedback (pace, filler words, pauses) is available for voice answers, which arrive in a later phase."}</p>
-      </Card>
-
       <Card title="Question by question">
         <div className="space-y-4">
           {report.perQuestion.map((item) => (

@@ -7,6 +7,7 @@
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 import { normalizePath } from "../../lib/interview/brief";
+import { traced } from "../../lib/tracing";
 import type { RepoContext } from "../context";
 
 /** How much of one file a single readFile call may return. */
@@ -78,7 +79,7 @@ export const readFile = createTool({
       return { found: false, path, content: "", truncated: false, error: "No such file. Use a path from the list of real file paths." };
     }
     try {
-      const text = await repo.readFile(path);
+      const text = await traced({ op: "gen_ai.execute_tool", name: "execute_tool readFile", attributes: { "gen_ai.tool.name": "readFile" } }, () => repo.readFile(path));
       const lines = text.split("\n");
       const start = (input.startLine ?? 1) - 1;
       const end = input.endLine ?? lines.length;

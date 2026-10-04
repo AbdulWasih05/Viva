@@ -137,3 +137,39 @@ Verified: `pnpm typecheck`, `pnpm lint`, `pnpm test` (63 tests) and `pnpm build`
   - Each answer goes to `/api/turn` together with the whole interview so far. The server scores it, asks the agent or the model for the next question, and sends the updated interview back.
   - `/api/report` computes the scores, has Gemma write the coaching text, and in local mode saves the weak spots.
   - Every route checks its input with zod and turns any failure into a clear JSON error, so the page can show a message and a "Try again" link.
+
+## 4 Oct 2026: Phase 5, code parts only (Render blueprint, rate limit, README)
+
+What was built: `render.yaml`, the per-IP rate limit on `/api/ingest`, `/api/turn` and `/api/report`, and the README.
+
+Verified: `pnpm typecheck`, `pnpm lint`, `pnpm test` (69 tests) and `pnpm build` pass. The blueprint's build command (`pnpm install --frozen-lockfile`, then `pnpm build`) was run locally. Against the production server in hosted mode, ten ingest requests from one IP returned 200 eight times and then 429 with `Retry-After: 600`; a request from a second IP returned 200.
+
+- **Not done, needs Wasih:** the deploy itself (5.2), testing the Deploy button from a clean account (5.4) and walking the live URL (5.5). `render.yaml` has never been run by Render, so the plan name, Node version setting and pnpm build are unverified there.
+- `[POST]` The hosted demo has no database and no private model service: one free web service, one Google AI Studio key. The whole "server" state is a 30-minute cache of public file lists and ten minutes of request counts per IP.
+- **How it works (Phase 5, plain language):**
+  - `render.yaml` tells Render how to build and start the app and which settings to ask for.
+  - Each API route first counts recent requests from the caller's IP address; over the limit, it answers "try again in N minutes" without touching the model.
+  - Sample repos use briefs saved in the repo, so opening one costs no model tokens.
+
+## 5 Oct 2026: voice cut, Phase 7 (minimal Sentry)
+
+What changed: voice was cut from the app (DECISIONS D78), so the mic button, the voice badge and the "How you said it" card were removed. Sentry tracing was added: server setup, a helper in `src/lib/tracing`, a span per interview turn with quality attributes, a span per model call and per file read.
+
+Verified: `pnpm typecheck`, `pnpm lint`, `pnpm test` (69 tests) and `pnpm build` pass. With a placeholder DSN and `SENTRY_DEBUG_SPANS=true`, four turns on the Portfolio sample printed 4 turn spans, 7 model-call spans and 3 tool spans to the server log, with the attributes listed in D83 and no prompt or answer text.
+
+- **Not done, needs a real `SENTRY_DSN`:** nothing has been sent to a real Sentry project. The 3 traced interviews, the screenshots and the check of Sentry's automatic spans are open (PHASES 7.4, 7.4a).
+- `[POST]` Example turn span from the local log: `gen_ai.invoke_agent "interview turn" viva.round="deep-dive" viva.question_names_real_file=true viva.tool_calls=1 viva.json_repair_used=false viva.fallback_used=false viva.score=0`.
+- `[POST]` Example model-call span: `gen_ai.chat "chat gemma-4-26b-a4b-it" viva.call="question (agent)" viva.waited_for_budget_ms=33867 gen_ai.usage.input_tokens=4929`. The 34-second wait for the free tier's token budget is visible as an attribute.
+- `[WHY]` First attempt logged nothing: Sentry SDK 11 streams spans and silently skips `beforeSendTransaction`; and `withSentryConfig` has to be imported from `@sentry/nextjs/config`.
+- **How it works (Phase 7, plain language):**
+  - When the server starts, Next.js runs `instrumentation.ts`, which loads the Sentry setup if a DSN is configured.
+  - `/api/turn` wraps each turn in a span and, when the turn is done, writes the quality facts onto it as attributes.
+  - `generateStructured` wraps each model call in a child span with time, tokens, and whether a repair or fallback was needed.
+  - Only numbers, true/false values and short labels are attached. The candidate's answers never are.
+
+## 5 Oct 2026: Phase 10 material (notes, outline, Entire excerpts)
+
+- `docs/post/notes.md`: all 25 `[POST]` and 12 `[WHY]` lines from this file, grouped by phase, collected by script with the wording unchanged.
+- `docs/post/outline.md`: the post's sections with pointers to the numbers, screenshots and code for each, and the items only Wasih can fill in (the friend, the video, the live URL, Sentry screenshots).
+- `docs/post/entire/`: `entire checkpoint explain --short` output for the three checkpoints behind the "why this code exists" stories. Their summary sections are empty; `--generate` was not run. The author's email was removed from the saved text.
+- Not done here: the post itself (Wasih writes it), the video, the friend test, the deploy.

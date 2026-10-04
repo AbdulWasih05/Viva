@@ -140,9 +140,6 @@ export function InterviewScreen(props: {
             <Button type="button" variant="ghost" disabled={props.busy} onClick={() => submit("")}>
               Skip / I don&apos;t know
             </Button>
-            <Button type="button" variant="ghost" disabled title="Voice answers arrive with the ElevenLabs phase">
-              Mic (later phase)
-            </Button>
           </div>
         </form>
       ) : null}

@@ -3,7 +3,7 @@
 /** Screen 1: choose a repo and how you want to be interviewed. */
 import { useState } from "react";
 import type { Persona, Settings } from "@/lib/interview/schemas";
-import { Badge, Button, Card, ErrorNote } from "./ui";
+import { Button, Card, ErrorNote } from "./ui";
 
 export type Sample = { id: string; label: string; description: string };
 
@@ -69,12 +69,9 @@ export function StartScreen(props: {
             </label>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <Button type="submit" disabled={props.busy || target.trim() === ""}>
-              {props.busy ? "Reading your repo..." : "Read my project"}
-            </Button>
-            <Badge>Voice mode arrives in a later phase</Badge>
-          </div>
+          <Button type="submit" disabled={props.busy || target.trim() === ""}>
+            {props.busy ? "Reading your repo..." : "Read my project"}
+          </Button>
         </form>
       </Card>
 
