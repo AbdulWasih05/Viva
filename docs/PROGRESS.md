@@ -173,3 +173,13 @@ Verified: `pnpm typecheck`, `pnpm lint`, `pnpm test` (69 tests) and `pnpm build`
 - `docs/post/outline.md`: the post's sections with pointers to the numbers, screenshots and code for each, and the items only Wasih can fill in (the friend, the video, the live URL, Sentry screenshots).
 - `docs/post/entire/`: `entire checkpoint explain --short` output for the three checkpoints behind the "why this code exists" stories. Their summary sections are empty; `--generate` was not run. The author's email was removed from the saved text.
 - Not done here: the post itself (Wasih writes it), the video, the friend test, the deploy.
+
+## 5 Oct 2026: merge, deploy check, real Sentry traces, IP-address fix
+
+- **Merged:** PRs #1 to #5 and #8 squash-merged into `main` (6 commits); #6 and #7 closed because #8 contained them. The combined tree passed typecheck, lint, 69 tests and a production build before the last merge.
+- `[POST]` **Live on Render:** https://viva-ou6t.onrender.com . The blueprint built on the first try. Checked through the API on 5 Oct: health; three error cases returned HTTP 400 with clear messages; the Viva sample brief in 0.5 s; turns of 5 to 18 s including a follow-up, a skip and a question after the agent read `src/mastra/index.ts`; end early; report in 12.9 s.
+- `[POST]` **A real repo on the live site:** `AbdulWasih05/vidyut-mitra` pasted as a GitHub URL: brief in 44 s from 13 of 94 files, 8 hooks, 0 invented paths, every hook file real. It has no Entire checkpoints, so the hint was shown instead of AI-written areas.
+- **Not checked on the live site:** the pages were not clicked through in a browser; only the API was exercised.
+- `[POST]` **Real Sentry traces.** Three short interviews (one per sample, 4 turns each) run locally against the real DSN produced 12 turn spans, 21 model-call spans and 10 tool spans. Wasih confirmed them in Sentry. Screenshot `docs/post/sentry-turn-span.png`: a deep-dive turn with `viva.ai_authored_question=true`, `viva.question_names_real_file=true`, `viva.tool_calls=1`, no repair, no fallback, 12.66 s.
+- `[POST]` **The grounding check caught one.** Another real trace shows `viva.followup_references_answer=false`: Gemma's follow-up claimed to build on the answer, but the phrase it quoted was not in it.
+- `[POST]` `[WHY]` **Sentry was recording IP addresses.** The screenshot above shows `user.ip_address` on the span. Fixed in DECISIONS D87; after the fix a local run with `SENTRY_DEBUG_SPANS=true` listed no visitor attribute on any AI span. Not yet re-checked in the Sentry UI, and the live site needs a redeploy to pick it up.

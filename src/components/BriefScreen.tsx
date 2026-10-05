@@ -3,7 +3,9 @@
 /** Screen 2: what Viva understood about the project. The candidate can correct it before the interview. */
 import { useState } from "react";
 import type { IngestResult } from "@/lib/client/api";
-import { Badge, Button, Card, ErrorNote } from "./ui";
+import { Badge, Button, ErrorNote, Panel, Path, Section, inputClass } from "./ui";
+
+const KIND_LABELS = { file: "File", function: "Function", decision: "Decision", risk: "Risk", "ai-authored": "AI-written" } as const;
 
 export function BriefScreen(props: {
   ingest: IngestResult;
@@ -19,104 +21,117 @@ export function BriefScreen(props: {
   const [correction, setCorrection] = useState("");
 
   return (
-    <div className="space-y-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">{ingest.repoLabel}</h1>
-        <button onClick={props.onBack} className="text-sm text-zinc-400 underline underline-offset-2 hover:text-white">
+    <div className="space-y-10">
+      <header className="space-y-3">
+        <button onClick={props.onBack} className="text-sm text-zinc-500 underline decoration-zinc-300 underline-offset-4 hover:text-zinc-900">
           Choose another project
         </button>
-      </header>
-
-      {ingest.usedFallback ? <ErrorNote message="The model could not analyse this repo, so the brief below only lists its main files. The interview will still work." /> : null}
-
-      <Card title="What Viva understood">
-        <p className="text-zinc-200">{brief.summary}</p>
-        <div className="mt-3 flex flex-wrap gap-2">
+        <h1 className="font-display text-4xl tracking-tight text-zinc-900">{ingest.repoLabel}</h1>
+        <p className="max-w-3xl text-lg text-zinc-700">{brief.summary}</p>
+        <div className="flex flex-wrap gap-1.5">
           {brief.stack.map((item) => (
             <Badge key={item}>{item}</Badge>
           ))}
         </div>
-      </Card>
+      </header>
 
-      <Card title="What you may be asked about">
-        <ul className="space-y-2 text-sm">
-          {brief.hooks.map((hook) => (
-            <li key={hook.id} className="flex gap-3">
-              <span className="shrink-0">
-                <Badge tone={hook.kind === "ai-authored" ? "violet" : hook.kind === "risk" ? "amber" : "neutral"}>{hook.kind}</Badge>
-              </span>
-              <span>
-                <span className="text-zinc-100">{hook.ref}</span>
-                {hook.file ? <code className="ml-2 text-xs text-zinc-400">{hook.file}</code> : null}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </Card>
+      {ingest.usedFallback ? <ErrorNote message="The model could not analyse this repo, so the brief below only lists its main files. The interview will still work." /> : null}
 
-      <Card title="AI-written areas">
-        {ingest.aiAreas.length === 0 ? (
-          <p className="text-sm text-zinc-400">{ingest.provenanceHint ?? "No AI-written source files were found."}</p>
-        ) : (
-          <>
-            <p className="mb-3 text-sm text-zinc-300">
-              {ingest.checkpointCount} Entire checkpoint{ingest.checkpointCount === 1 ? "" : "s"} show an AI agent session produced {ingest.aiAreas.length} source file
-              {ingest.aiAreas.length === 1 ? "" : "s"}. Expect at least one question on them.
-            </p>
-            <ul className="max-h-48 space-y-1.5 overflow-y-auto text-sm">
-              {ingest.aiAreas.map((area) => (
-                <li key={area.path}>
-                  <code className="text-violet-300">{area.path}</code>
-                  <span className="ml-2 text-zinc-500">
-                    commit {area.commit}, prompt: &ldquo;{area.promptSummary}&rdquo;
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="space-y-10">
+          <Section title="What you may be asked about" aside={`${brief.hooks.length} topics`}>
+            <ul className="divide-y divide-zinc-100">
+              {brief.hooks.map((hook) => (
+                <li key={hook.id} className="flex items-start gap-3 py-2.5">
+                  <span className="w-24 shrink-0 pt-0.5">
+                    <Badge tone={hook.kind === "ai-authored" ? "ai" : hook.kind === "risk" ? "warn" : "neutral"}>{KIND_LABELS[hook.kind]}</Badge>
+                  </span>
+                  <span className="min-w-0 text-sm">
+                    <span className="text-zinc-900">{hook.ref}</span>
+                    {hook.file && !hook.ref.includes(hook.file) ? (
+                      <span className="mt-0.5 block">
+                        <Path>{hook.file}</Path>
+                      </span>
+                    ) : null}
                   </span>
                 </li>
               ))}
             </ul>
-          </>
-        )}
-      </Card>
+          </Section>
 
-      <Card title="Last time">
-        {ingest.previousWeakSpots.length > 0 ? (
-          <div className="space-y-2 text-sm">
-            <p className="text-zinc-300">You struggled with these. The interview opens by retesting the first {Math.min(2, ingest.previousWeakSpots.length)}.</p>
-            <ul className="list-disc space-y-1 pl-5 text-zinc-200">
-              {ingest.previousWeakSpots.map((spot) => (
-                <li key={spot.topic}>
-                  {spot.topic} <span className="text-zinc-500">({spot.lastScore}/4 on {spot.sessionDate})</span>
-                </li>
-              ))}
-            </ul>
-            <button onClick={props.onForget} className="text-zinc-400 underline underline-offset-2 hover:text-white">
-              Forget this project
-            </button>
-          </div>
-        ) : (
-          <p className="text-sm text-zinc-400">{ingest.memory.enabled ? "No earlier session for this project yet." : ingest.memory.label}</p>
-        )}
-      </Card>
-
-      <Card title="Anything wrong?">
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <input
-            value={correction}
-            onChange={(event) => setCorrection(event.target.value)}
-            placeholder='One correction, for example "the frontend was my teammate&apos;s work"'
-            maxLength={300}
-            className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm outline-none focus:border-emerald-600"
-          />
-          <Button variant="ghost" disabled={props.busy || correction.trim() === ""} onClick={() => props.onCorrect(correction.trim())}>
-            Update brief
-          </Button>
+          <Section title="AI-written code" aside={ingest.aiAreas.length > 0 ? `${ingest.aiAreas.length} files, from ${ingest.checkpointCount} Entire checkpoints` : undefined}>
+            {ingest.aiAreas.length === 0 ? (
+              <p className="text-sm text-zinc-600">{ingest.provenanceHint ?? "No AI-written source files were found."}</p>
+            ) : (
+              <>
+                <p className="text-sm text-zinc-700">
+                  Your Entire checkpoints show an AI agent session produced these files. Expect at least one question about them, quoting the prompt that started the
+                  session.
+                </p>
+                <ul className="max-h-64 divide-y divide-zinc-100 overflow-y-auto rounded-lg border border-zinc-200">
+                  {ingest.aiAreas.map((area) => (
+                    <li key={area.path} className="px-3 py-2 text-sm">
+                      <Path>{area.path}</Path>
+                      <span className="mt-1 block text-xs text-zinc-500">
+                        commit {area.commit} · prompt: &ldquo;{area.promptSummary}&rdquo;
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </Section>
         </div>
-      </Card>
 
-      {props.error ? <ErrorNote message={props.error} /> : null}
+        {/* The whole column stays in view while the long lists on the left scroll. */}
+        <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+          <Panel className="space-y-3">
+            <h2 className="font-medium text-zinc-900">Ready?</h2>
+            <p className="text-sm text-zinc-600">Answer the way you would in a real interview. You can skip a question or end early at any time.</p>
+            <Button disabled={props.busy} onClick={props.onBegin} className="w-full">
+              {props.busy ? "Starting..." : "Start the interview"}
+            </Button>
+            {props.error ? <ErrorNote message={props.error} /> : null}
+          </Panel>
 
-      <Button disabled={props.busy} onClick={props.onBegin}>
-        {props.busy ? "Starting..." : "Start the interview"}
-      </Button>
+          <Panel className="space-y-3">
+            <h2 className="font-medium text-zinc-900">Last time</h2>
+            {ingest.previousWeakSpots.length > 0 ? (
+              <>
+                <p className="text-sm text-zinc-600">You struggled with these. The interview opens by retesting the first {Math.min(2, ingest.previousWeakSpots.length)}.</p>
+                <ul className="space-y-1.5 text-sm text-zinc-800">
+                  {ingest.previousWeakSpots.map((spot) => (
+                    <li key={spot.topic} className="flex items-baseline justify-between gap-3">
+                      <span>{spot.topic}</span>
+                      <span className="shrink-0 text-xs text-zinc-500">{spot.lastScore}/4</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button variant="quiet" onClick={props.onForget}>
+                  Forget this project
+                </Button>
+              </>
+            ) : (
+              <p className="text-sm text-zinc-600">{ingest.memory.enabled ? "No earlier session for this project yet." : ingest.memory.label}</p>
+            )}
+          </Panel>
+
+          <Panel className="space-y-3">
+            <h2 className="font-medium text-zinc-900">Anything wrong?</h2>
+            <p className="text-sm text-zinc-600">Add one correction and Viva rewrites the brief.</p>
+            <input
+              value={correction}
+              onChange={(event) => setCorrection(event.target.value)}
+              placeholder="The frontend was my teammate's work"
+              maxLength={300}
+              className={inputClass}
+            />
+            <Button variant="secondary" disabled={props.busy || correction.trim() === ""} onClick={() => props.onCorrect(correction.trim())} className="w-full">
+              Update brief
+            </Button>
+          </Panel>
+        </aside>
+      </div>
     </div>
   );
 }

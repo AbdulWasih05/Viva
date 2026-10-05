@@ -149,12 +149,14 @@ Pure, testable logic that the Mastra agent will call.
 ## Phase 5: Render (Sun midday, 2 h)
 
 - [x] **5.1 `render.yaml` blueprint**: web service (Next.js) ~~+ private service (Ollama with persistent disk, pulls the Gemma model on start); web talks to Ollama over the private network~~ calling the hosted Gemma endpoint (DECISIONS D6: private services and disks are paid only)
-- [ ] **5.2 Deploy**; measure cold start and per-turn latency `[POST]`; add `/api/health` and a 5-minute uptime ping so the free instance stays awake (DECISIONS D7)
+- [x] **5.2 Deploy**; measure cold start and per-turn latency `[POST]`; add `/api/health` and a 5-minute uptime ping so the free instance stays awake (DECISIONS D7)
 - [x] **5.3 Hosted hardening**: `LOCAL_MODE=false`, per-IP rate limit, cached briefs for sample repos
 - [ ] **5.4 Deploy to Render button** in README; test it from a clean account or fork if possible
   - [x] Button and instructions are in the README
   - [ ] Tested on Render (needs `render.yaml` on `main` and a Render account)
 - [ ] **5.5 Verify** the live URL from a fresh browser: full interview end to end
+  - [x] Walked through the API on the live URL (sample and a real GitHub repo)
+  - [ ] Clicked through in a browser
 
 ---
 
@@ -178,8 +180,9 @@ Voice was dropped from the app on 4 Oct to protect the core. None of the tasks b
 - [x] **7.3 Quality attributes**: `invented_paths_dropped`, `json_repair_used`, `question_names_real_file`, `ai_authored_question`, `followup_references_answer`, `persona`, `model`, `provider`
 - [ ] **7.4 Privacy**: confirm no answer text or audio in spans or breadcrumbs
   - [x] Our own spans checked locally with `SENTRY_DEBUG_SPANS=true`: attributes are booleans, numbers and short labels only
-  - [ ] Check in the Sentry UI that the automatic HTTP spans carry no request bodies (needs a DSN)
-- [ ] **7.4a** 3 traced interviews and screenshots into `docs/post/` (needs `SENTRY_DSN`)
+  - [x] Sentry UI showed `user.ip_address` on spans; switched off (DECISIONS D87)
+  - [ ] Re-check in the Sentry UI after redeploying that no IP address or request body is attached
+- [x] **7.4a** 3 traced interviews and screenshots into `docs/post/` (needs `SENTRY_DSN`): done 5 Oct, `docs/post/sentry-turn-span.png`
 - [ ] ~~**7.5 Comparison**: run evals on local ~4B and hosted larger Gemma with tracing on; dashboard or screenshots comparing latency, repair rate, real-file rate `[POST]`~~ cut (D79)
 - [ ] ~~**7.6 Debugging story**: find one real issue via traces, fix it, before/after numbers `[POST]` `[WHY]`~~ cut (D79); the server-log debugging story from Phase 4 (D68) is the nearest equivalent
 

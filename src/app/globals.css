@@ -1,20 +1,47 @@
 @import "tailwindcss";
 
-/* One dark theme. Colours come from Tailwind's zinc and emerald scales in the components. */
+/*
+ * One light theme: white paper, near-black ink, one accent colour.
+ * Fonts are system fonts only, so nothing is fetched and the app also starts with Wi-Fi off.
+ *   - display: a serif for headings and for the interviewer's questions (they read like an exam paper)
+ *   - sans:    the body text and controls
+ *   - mono:    file paths and code
+ */
 :root {
-  --background: #09090b;
-  --foreground: #f4f4f5;
+  --background: #ffffff;
+  --foreground: #18181b;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --color-accent: #3730a3;
+  --color-accent-soft: #eef2ff;
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --font-sans: "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+html {
+  /* A slightly larger base size and looser lines: this app is mostly reading. */
+  font-size: 16.5px;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* A visible keyboard focus ring everywhere, in the accent colour. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--color-accent-soft);
 }

@@ -145,6 +145,12 @@ Architecture choices and research surprises, newest at the bottom. One line of r
 - **D85. SDK 11 streams spans,** so `beforeSendTransaction` is ignored (the SDK says so at startup). The local check uses `beforeSendSpan`: with `SENTRY_DEBUG_SPANS=true` every AI span is printed to the server log with its attributes.
 - **D86. Unknown:** whether Sentry's AI SDK integration produces any automatic spans for Mastra's internal model calls. None showed up in the local span log; the manual spans are what is known to work.
 
+## After the merge (5 Oct 2026)
+
+- **D87. Sentry must not record visitor IP addresses.** `[WHY]` The first real trace in Sentry showed `user.ip_address` on the turn span (`::1`, because it came from a local run). On the hosted site that would have been each visitor's address, against the "metadata only" rule. Fix: `dataCollection` in `Sentry.init` turns off user info, cookies, headers, query strings, request bodies and model inputs and outputs, and `beforeSendSpan` deletes visitor-identifying attributes as a second line of defence. This supersedes the "not checked yet" note in D84.
+- **D88. Six squash commits on `main`** for the whole build (Wasih's choice, to keep the contribution graph small): phases 0 to 4 one each, then phases 5, 7 and the post material as one. Each stacked branch was rebased onto the new `main` before its squash-merge, because a squash commit is not an ancestor of the next branch and the merge would otherwise conflict.
+- **D89. The demo runs without `GITHUB_TOKEN`** (Wasih's choice). GitHub's 60 requests per hour is enough for a demo: sample repos use none.
+
 ### Research notes for later phases (unverified until used)
 
 - **Mastra:** custom OpenAI-compatible endpoint via `model: { id, url, apiKey }` (docs show LM Studio only); fallback `@ai-sdk/openai-compatible`. Structured output via `agent.generate(prompt, { structuredOutput: { schema, jsonPromptInjection, errorStrategy, fallbackValue } })`. Memory via `@mastra/memory` + `@mastra/libsql`. Official Sentry exporter `@mastra/sentry`.
