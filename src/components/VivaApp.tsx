@@ -5,7 +5,7 @@
  * The interview state lives here in the browser and is sent to the server with every turn,
  * so the server keeps nothing between requests.
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api, type IngestResult, type ReportResult } from "@/lib/client/api";
 import type { InterviewState } from "@/lib/interview/schemas";
 import { createInterviewState } from "@/lib/interview/state";
@@ -13,9 +13,16 @@ import { BriefScreen } from "./BriefScreen";
 import { InterviewScreen } from "./InterviewScreen";
 import { ReportScreen } from "./ReportScreen";
 import { StartScreen, type Sample, type StartChoice } from "./StartScreen";
-import { Badge } from "./ui";
+import { Badge, ErrorNote } from "./ui";
 
 type Step = "start" | "brief" | "interview" | "report";
+
+const STEPS: { id: Step; label: string }[] = [
+  { id: "start", label: "Project" },
+  { id: "brief", label: "Brief" },
+  { id: "interview", label: "Interview" },
+  { id: "report", label: "Report" },
+];
 
 export function VivaApp(props: { localMode: boolean; modelLabel: string; samples: Sample[] }) {
   const [step, setStep] = useState<Step>("start");
@@ -29,6 +36,11 @@ export function VivaApp(props: { localMode: boolean; modelLabel: string; samples
   const [report, setReport] = useState<ReportResult | null>(null);
   // Remembered so "Try again" can repeat exactly the step that failed.
   const [lastAnswer, setLastAnswer] = useState<string | undefined>(undefined);
+
+  // Each step is a new page of content, so start it from the top.
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [step]);
 
   /** Runs one server call with the shared busy and error handling. */
   async function run(task: () => Promise<void>) {
@@ -105,11 +117,38 @@ export function VivaApp(props: { localMode: boolean; modelLabel: string; samples
   };
 
   return (
-    <main className="mx-auto w-full max-w-4xl flex-1 space-y-6 px-5 py-8">
-      <div className="flex flex-wrap items-center gap-2 text-xs">
-        <Badge tone={props.localMode ? "green" : "neutral"}>{props.localMode ? "Local mode: private, with memory" : "Hosted demo: nothing is stored"}</Badge>
-        <Badge>{props.modelLabel}</Badge>
-      </div>
+    <div className="flex min-h-full flex-1 flex-col">
+      <header className="border-b border-zinc-200">
+        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-x-8 gap-y-3 px-6 py-4">
+          <button onClick={restart} className="font-display text-2xl tracking-tight text-zinc-900" aria-label="Viva, back to start">
+            Viva
+          </button>
+          {/* Where you are in the four steps. */}
+          <ol className="flex items-center gap-1 text-sm">
+            {STEPS.map((item, index) => {
+              const position = STEPS.findIndex((s) => s.id === step);
+              const status = index === position ? "current" : index < position ? "done" : "todo";
+              return (
+                <li key={item.id} className="flex items-center gap-1">
+                  {index > 0 ? <span className="mx-1 h-px w-4 bg-zinc-300" /> : null}
+                  <span
+                    aria-current={status === "current" ? "step" : undefined}
+                    className={status === "current" ? "font-medium text-zinc-900" : status === "done" ? "text-zinc-500" : "text-zinc-300"}
+                  >
+                    {item.label}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+          <div className="flex items-center gap-1.5">
+            <Badge tone={props.localMode ? "good" : "neutral"}>{props.localMode ? "Local: private, with memory" : "Hosted demo: nothing stored"}</Badge>
+            <Badge>{props.modelLabel}</Badge>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-12">
 
       {step === "start" ? <StartScreen localMode={props.localMode} samples={props.samples} busy={busy} error={error} onStart={readProject} /> : null}
 
@@ -147,16 +186,21 @@ export function VivaApp(props: { localMode: boolean; modelLabel: string; samples
         report && state && ingest ? (
           <ReportScreen repoLabel={state.repoLabel} result={report} memoryLabel={ingest.memory.label} onRestart={restart} />
         ) : error ? (
-          <div className="space-y-3">
-            <p className="text-sm text-red-200">{error}</p>
-            <button className="text-sm underline underline-offset-2" onClick={() => state && retryReport(state)}>
-              Try again
-            </button>
-          </div>
+          <ErrorNote message={error} onRetry={() => state && retryReport(state)} />
         ) : (
-          <p className="text-zinc-400">Writing your report...</p>
+          <p className="flex items-center gap-2 text-zinc-500" aria-live="polite">
+            <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-accent" />
+            Scoring your answers and writing the report...
+          </p>
         )
       ) : null}
-    </main>
+      </main>
+
+      <footer className="border-t border-zinc-200">
+        <div className="mx-auto w-full max-w-5xl px-6 py-4 text-xs text-zinc-500">
+          The interviewer is Gemma, an open-weight model. Your interview stays in this browser tab; the hosted demo stores nothing.
+        </div>
+      </footer>
+    </div>
   );
 }
